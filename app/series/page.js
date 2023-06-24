@@ -1,13 +1,13 @@
-import HomeDisplay from "@/components/display/HomeDisplay";
+import TvDisplay from "@/components/display/TvDisplay";
 import HomeFilter from "@/components/filter/HomeFilter";
 import SearchBar from "@/components/searchbar/SearchBar";
-import Title from "@/components/title/Title";
+import TvTitle from "@/components/title/TvTitle";
+import React from "react";
 
 async function getData() {
   const apikey = process.env.API_KEY;
   const resp = await fetch(
-    // `https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=en-US&page=1`
-    `https://api.themoviedb.org/3/trending/all/week?api_key=${apikey}&language=en-US&page=1`
+    `https://api.themoviedb.org/3/trending/tv/week?api_key=${apikey}&language=en-US&page=1`
   );
 
   if (!resp.ok) {
@@ -18,14 +18,16 @@ async function getData() {
   return res;
 }
 
-export default async function Home() {
+const Series = async () => {
   const data = await getData();
   return (
     <div className="w-100 h-auto">
-      <Title />
+      <TvTitle />
       <SearchBar />
       <HomeFilter />
-      <HomeDisplay movies={data} />
+      <TvDisplay series={data} />
     </div>
   );
-}
+};
+
+export default Series;
