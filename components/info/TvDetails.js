@@ -2,7 +2,7 @@ import React from "react";
 import { AiTwotoneStar } from "react-icons/Ai";
 
 const TvDetails = (props) => {
-  let { TvDetail, genreArr } = props;
+  let { TvDetail, genreArr, SeasonNums, EpisodeNums } = props;
 
   return (
     <div className="text-white text-left w-3/5 ml-8">
@@ -10,9 +10,10 @@ const TvDetails = (props) => {
         TV
       </p>
       <h1 className="text-3xl">{TvDetail.name}</h1>
-      <div className="flex justify-between mt-4 w-1/4">
+      <div className="flex justify-between mt-4 w-1/2">
         <span>{TvDetail.first_air_date.substr(0, 4)}</span>
-        <span>"6 Seasons"</span>
+        <span>{SeasonNums} Seasons</span>
+        <span>{EpisodeNums} Episodes</span>
         <div className="flex items-center">
           <AiTwotoneStar className="text-primary mr-1" />
           <span>{TvDetail.vote_average.toFixed(1)}</span>

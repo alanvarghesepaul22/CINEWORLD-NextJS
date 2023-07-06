@@ -10,7 +10,7 @@ export async function getData(pageid) {
   }
   const res = await fetch(
     // `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=${pageid}`
-    `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=en-US&page=${pageid}`
+    `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=${pageid}`
   );
   let result = await res.json();
   let data = result.results;

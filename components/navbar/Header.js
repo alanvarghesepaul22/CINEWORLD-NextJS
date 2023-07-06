@@ -7,7 +7,7 @@ const Header = () => {
     <nav className="flex items-center justify-between px-16">
       <Link href="/">
         <div className="">
-          <p className="bg-primary w-32 py-3 my-5 text-bg-black font-extrabold text-center rounded-sm">
+          <p className="bg-primary w-32 py-2 my-5 text-bg-black font-extrabold text-center rounded-sm">
             CINEWORLD
           </p>
         </div>

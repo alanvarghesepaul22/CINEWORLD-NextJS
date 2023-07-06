@@ -2,21 +2,28 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const SeasonCard = () => {
+const SeasonCard = (props) => {
+  let { SeasonDetails, SeriesId } = props;
+  let poster_path = `https://image.tmdb.org/t/p/w342/${SeasonDetails.poster_path}`;
+  if (SeasonDetails.poster_path == null) {
+    poster_path = "https://i.imgur.com/wjVuAGb.png";
+  }
   return (
     <div className="flex flex-col items-center ">
       <div className="w-52 h-72 bg-gray m-3 hover:opacity-75">
-        <Link href="/movies" title="title">
+        <Link href="/series/[id]/season/[seasonid]" as={`/series/${SeriesId}/season/${SeasonDetails.season_number}`} title={SeasonDetails.name}>
           <Image
-            src="/movieCard.jpg"
-            alt="Picture"
+            src={poster_path}
+            alt={SeasonDetails.name}
             className="rounded w-full h-full"
             width={208}
             height={288}
           />
         </Link>
       </div>
-      <p className="text-center text-white text-lg font-semibold mb-5">Season 1</p>
+      <p className="text-center text-white text-lg font-semibold mb-5">
+        {SeasonDetails.name}
+      </p>
     </div>
   );
 };

@@ -7,7 +7,7 @@ async function getData() {
   const apikey = process.env.API_KEY;
   const resp = await fetch(
     // `https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=en-US&page=1`
-    `https://api.themoviedb.org/3/trending/all/week?api_key=${apikey}&language=en-US&page=1`
+    `https://api.themoviedb.org/3/trending/all/day?api_key=${apikey}&page=1`
   );
 
   if (!resp.ok) {

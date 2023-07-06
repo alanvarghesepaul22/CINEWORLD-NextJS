@@ -3,16 +3,18 @@ import ImageCard from "../display/ImageCard";
 import SeasonDetails from "./SeasonDetails";
 import EpisodeDisplay from "../display/EpisodeDisplay";
 
-const SeasonInfo = () => {
+const SeasonInfo = (props) => {
+  let {SeasonInfos,id}=props;
+  let episodes = SeasonInfos.episodes;
   return (
     <div>
       <div className="flex flex-row place-content-center items-center mb-10 mt-5">
-        <ImageCard />
-        <SeasonDetails />
+        <ImageCard MovieDetail={SeasonInfos} />
+        <SeasonDetails SeasonInfos={SeasonInfos} />
       </div>
 
       <div>
-        <EpisodeDisplay/>
+        <EpisodeDisplay EpisodeInfos={episodes} seriesId={id} />
       </div>
     </div>
   );
