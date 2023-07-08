@@ -6,7 +6,7 @@ const MovieInfo = (props) => {
   let {MovieDetail,genreArr,id}=props
   return (
     <div>
-      <div className="flex flex-row place-content-center items-center mb-10 mt-5">
+      <div className="flex flex-row flex-wrap place-content-center items-center mb-10 mt-5">
         <ImageCard MovieDetail={MovieDetail} />
         <MovieDetails MovieDetail={MovieDetail} genreArr={genreArr} />
       </div>
