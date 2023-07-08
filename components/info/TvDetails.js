@@ -32,7 +32,7 @@ const TvDetails = (props) => {
           return (
             <p
               key={index}
-              className="text-light-primary border px-3 rounded-full w-fit  my-1"
+              className="text-light-primary border border-light-primary px-3 rounded-full w-fit  my-1"
             >
               {item}
             </p>
