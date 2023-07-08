@@ -18,19 +18,20 @@ const EpisodeDetails = (props) => {
   let { episodeDetails } = props;
   const formattedDate = formatDate(episodeDetails.air_date);
   return (
-    <div className="text-white text-left w-3/5">
-      <h1 className="text-3xl text-center">
+    <div className="text-white text-left w-4/5">
+      <h1 className="text-2xl sm:text-3xl text-center">
         <span className="text-primary">
           S{episodeDetails.season_number}E{episodeDetails.episode_number}
         </span>{" "}
         : {episodeDetails.name}
       </h1>
-      <div className="flex w-full justify-center font-light text-slate-300">
-        <p className="mt-3 px-5">{formattedDate}</p>
-        <p className="mt-3 px-5">{episodeDetails.runtime} mins.</p>
+
+      <div className="flex w-full flex-wrap justify-center font-light text-slate-300 text-sm sm:text-base mt-3">
+        <p className="px-5">{formattedDate}</p>
+        <p className="px-5">{episodeDetails.runtime} mins.</p>
       </div>
 
-      <p className="text-light-white mt-5 text-justify text-lg">
+      <p className="text-light-white mt-5 text-justify text-base sm:text-lg">
         {episodeDetails.overview}
       </p>
     </div>

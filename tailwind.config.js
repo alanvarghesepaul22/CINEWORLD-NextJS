@@ -17,8 +17,9 @@ module.exports = {
         primary: "#FDE402",
         "light-primary": "#A69C40",
         white: "#ffffff",
-        gray: "#1D1B1B",
+        grey: "#1D1B1B",
         "light-white": "#6D6B6B",
+        "navbg":"rgb(8, 8, 8)"
       },
     },
   },

@@ -4,10 +4,10 @@ import SearchBar from "@/components/searchbar/SearchBar";
 import Title from "@/components/title/Title";
 
 async function getData() {
-  const apikey = process.env.API_KEY;
+  const apiKey = process.env.API_KEY;
   const resp = await fetch(
-    // `https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=en-US&page=1`
-    `https://api.themoviedb.org/3/trending/all/day?api_key=${apikey}&page=1`
+    // `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`
+    `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=1`
   );
 
   if (!resp.ok) {
@@ -21,10 +21,10 @@ async function getData() {
 export default async function Home() {
   const data = await getData();
   return (
-    <div className="w-100 h-auto">
+    <div className=" h-auto">
       <Title />
-      <SearchBar />
-      <HomeFilter />
+      {/* <SearchBar />
+      <HomeFilter /> */}
       <HomeDisplay movies={data} />
     </div>
   );

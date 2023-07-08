@@ -8,12 +8,12 @@ const MoviePagination = (props) => {
     pageid = 1;
   }
   return (
-    <div className="flex justify-center list-none">
-      <li className="">
+    <div className="flex justify-center items-center list-none flex-wrap">
+      <li className="mb-10 md:mb-0">
         <Link
           href="/movie/popular/page/[pageid]"
           as={`/movie/popular/page/${Number(pageid) - 1}`}
-          className="bg-gray p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
+          className="bg-grey p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
         >
           {`<`}
         </Link>
@@ -22,11 +22,11 @@ const MoviePagination = (props) => {
       {pagenum &&
         pagenum.map((element, index) => {
           return (
-            <li key={index} className="">
+            <li key={index} className="mb-10 md:mb-0">
               <Link
                 href="/movie/popular/page/[pageid]"
                 as={`/movie/popular/page/${element}`}
-                className="bg-gray p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
+                className="bg-grey p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
               >
                 {`${element}`}
               </Link>
@@ -34,11 +34,11 @@ const MoviePagination = (props) => {
           );
         })}
 
-      <li className="">
+      <li className="mb-10 md:mb-0">
         <Link
           href="/movie/popular/page/[pageid]"
           as={`/movie/popular/page/${Number(pageid) + 1}`}
-          className="bg-gray p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
+          className="bg-grey p-3 mx-2 text-light-white rounded-md stroke-2 hover:opacity-70 hover:text-white"
         >
           {`>`}
         </Link>

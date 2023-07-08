@@ -24,10 +24,10 @@ export async function getData(pageid) {
 const AllTrending = async ({ params }) => {
   let { data, pageid } = await getData(params.pageid);
   return (
-    <div className="w-100 h-auto">
+    <div className=" h-auto">
       <Title />
-      <SearchBar />
-      <HomeFilter />
+      {/* <SearchBar />
+      <HomeFilter /> */}
       <HomeDisplay movies={data} pageid={pageid} />
     </div>
   );

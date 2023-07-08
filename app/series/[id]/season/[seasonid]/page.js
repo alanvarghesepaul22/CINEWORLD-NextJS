@@ -2,9 +2,10 @@ import SeasonInfo from "@/components/info/SeasonInfo";
 import React from "react";
 
 async function getData(id, seasonid) {
-  const apikey = process.env.API_KEY;
+  const apiKey = process.env.API_KEY;
+
   const resp = await fetch(
-    `https://api.themoviedb.org/3/tv/${id}/season/${seasonid}?api_key=${apikey}`
+    `https://api.themoviedb.org/3/tv/${id}/season/${seasonid}?api_key=${apiKey}`
   );
 
   if (!resp.ok) {

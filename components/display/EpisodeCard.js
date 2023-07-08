@@ -9,7 +9,7 @@ const EpisodeCard = (props) => {
     still_path = "https://i.imgur.com/HIYYPtZ.png";
   }
   return (
-    <div className="flex flex-col items-center w-72 h-fit bg-gray m-3 ">
+    <div className="flex flex-col items-center w-72 h-auto bg-grey m-3 ">
       <div className="hover:opacity-75">
         <Link
           href="/series/[id]/season/[seasonid]/[epid]"
@@ -25,7 +25,7 @@ const EpisodeCard = (props) => {
           />
         </Link>
       </div>
-      <p className="text-center text-white text-sm font-light m-2">
+      <p className="my-2 text-center text-white text-sm font-light">
         <span className="text-primary font-semibold">
           S{episodeinfo.season_number} E{episodeinfo.episode_number}:
         </span>{" "}

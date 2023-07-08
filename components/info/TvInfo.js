@@ -9,7 +9,7 @@ const TvInfo = (props) => {
   
   return (
     <div>
-      <div className="flex flex-row place-content-center items-center mb-10 mt-5">
+      <div className="flex flex-row flex-wrap place-content-center items-center mb-10 mt-5">
         <ImageCard MovieDetail={TvDetail} />
         <TvDetails TvDetail={TvDetail} genreArr={genreArr} SeasonNums={TvDetail.number_of_seasons} EpisodeNums={TvDetail.number_of_episodes} />
       </div>

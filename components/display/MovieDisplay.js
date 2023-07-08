@@ -7,7 +7,7 @@ const MovieDisplay = (props) => {
   
   return (
     <>
-      <div className="flex flex-wrap justify-center p-10">
+      <div className="flex flex-wrap justify-center py-10 px-5">
         { movies.map((movie) => {
           return <MovieCards key={movie.id} MovieCard={movie} />;
         })}

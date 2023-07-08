@@ -23,10 +23,10 @@ export async function getData(pageid) {
 const PopularPage = async ({ params }) => {
   let { data, pageid } = await getData(params.pageid);
   return (
-    <div className="w-100 h-auto">
+    <div className=" h-auto">
       <MoviesTitle />
-      <SearchBar />
-      <HomeFilter />
+      {/* <SearchBar />
+      <HomeFilter /> */}
       <MovieDisplay movies={data} pageid={pageid} />
     </div>
   );

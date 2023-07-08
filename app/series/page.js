@@ -5,9 +5,9 @@ import TvTitle from "@/components/title/TvTitle";
 import React from "react";
 
 async function getData() {
-  const apikey = process.env.API_KEY;
+  const apiKey = process.env.API_KEY;
   const resp = await fetch(
-    `https://api.themoviedb.org/3/trending/tv/day?api_key=${apikey}&page=1`
+    `https://api.themoviedb.org/3/trending/tv/day?api_key=${apiKey}&page=1`
   );
 
   if (!resp.ok) {
@@ -22,10 +22,10 @@ const Series = async () => {
   const data = await getData();
   return (
     <>
-      <div className="w-100 h-auto">
+      <div className=" h-auto">
         <TvTitle />
-        <SearchBar />
-        <HomeFilter />
+        {/* <SearchBar />
+        <HomeFilter /> */}
         <TvDisplay series={data} />
       </div>
     </>
