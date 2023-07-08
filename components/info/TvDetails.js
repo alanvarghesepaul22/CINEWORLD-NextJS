@@ -1,5 +1,5 @@
 import React from "react";
-import { AiTwotoneStar } from "react-icons/Ai";
+import { AiTwotoneStar } from "react-icons/ai";
 
 const TvDetails = (props) => {
   let { TvDetail, genreArr, SeasonNums, EpisodeNums } = props;
