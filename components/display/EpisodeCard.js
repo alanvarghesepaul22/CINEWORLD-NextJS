@@ -9,7 +9,7 @@ const EpisodeCard = (props) => {
     still_path = "https://i.imgur.com/HIYYPtZ.png";
   }
   return (
-    <div className="flex flex-col items-center w-72 h-auto bg-grey m-3 ">
+    <div className="flex flex-col w-72 h-auto bg-grey m-3 ">
       <div className="hover:opacity-75">
         <Link
           href="/series/[id]/season/[seasonid]/[epid]"
