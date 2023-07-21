@@ -1,7 +1,5 @@
-## Welcome to CineWorld! The World of Cinema.
+# Welcome to CineWorld! The World of Cinema.
 CineWorld is a movie and tv shows streaming website created using TMDB API in React-Next JS Framework and Tailwind CSS.
-
-# Cineworld - Movie Streaming Marvel
 
 ![Cineworld](insert_image_url_here)
 
