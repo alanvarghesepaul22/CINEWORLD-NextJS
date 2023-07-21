@@ -1,11 +1,20 @@
 # Welcome to CineWorld! The World of Cinema.
 CineWorld is a movie and tv shows streaming website created using TMDB API in React-Next JS Framework and Tailwind CSS.
 
-![Cineworld](insert_image_url_here)
-
 ## Overview
 
 Cineworld is a dynamic and immersive movie streaming website that brings you an extensive collection of films from various genres. Powered by React, Next.js, and Tailwind CSS, Cineworld offers an unparalleled user experience, providing movie enthusiasts with a seamless and entertaining journey through the world of cinema.
+
+##Screenshots
+
+![Screenshot 2023-07-13 230452](https://github.com/alanvarghesepaul22/CINEWORLD-NextJS/assets/86376232/965879a8-9604-4b77-a83c-026f594a2e21)
+
+![Screenshot 2023-07-21 211717](https://github.com/alanvarghesepaul22/CINEWORLD-NextJS/assets/86376232/fae66266-2242-4311-9f53-8258c644b030)
+
+## Responsive Design 
+
+![Untitled-1](https://github.com/alanvarghesepaul22/CINEWORLD-NextJS/assets/86376232/a7bee4e3-59bd-4f64-8e47-d8d821f4425d)
+
 
 ## Key Features
 
