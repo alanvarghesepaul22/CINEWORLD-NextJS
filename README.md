@@ -24,8 +24,8 @@ Cineworld is a dynamic and immersive movie streaming website that brings you an 
 1. Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/cineworld.git
-cd cineworld
+git clone https://github.com/alanvarghesepaul22/CINEWORLD-NextJS.git
+cd CINEWORLD-NextJS
 ```
 
 2. Install the dependencies:
@@ -37,7 +37,7 @@ npm install
 3. Create a `.env.local` file in the root directory and add your TMDB API key:
 
 ```plaintext
-TMDB_API_KEY=your_tmdb_api_key
+API_KEY=your_tmdb_api_key
 ```
 
 4. Run the development server:
