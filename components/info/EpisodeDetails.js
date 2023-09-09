@@ -16,7 +16,11 @@ function formatDate(dateString) {
 
 const EpisodeDetails = (props) => {
   let { episodeDetails } = props;
-  const formattedDate = formatDate(episodeDetails.air_date);
+  let formattedDate = "";
+  if (episodeDetails.air_date != null) {
+    formattedDate = formatDate(episodeDetails.air_date);
+  }
+
   return (
     <div className="text-white text-left w-4/5">
       <h1 className="text-2xl sm:text-3xl text-center">

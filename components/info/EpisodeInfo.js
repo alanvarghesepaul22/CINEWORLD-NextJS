@@ -1,8 +1,11 @@
 import React from "react";
 import EpisodeDetails from "./EpisodeDetails";
+import NextEpisode from "../pagination/NextEpisode";
 
 const EpisodeInfo = (props) => {
-  let { episodeDetails, seriesId } = props;
+  let { episodeDetails, seriesId, seasonData, seriesData } = props;
+  let TotalEpisodes = seasonData.episodes.length;
+  let TotalSeasons = seriesData.number_of_seasons;
   return (
     <div>
       <div className="flex flex-row place-content-center items-center mb-10 mt-5">
@@ -15,6 +18,14 @@ const EpisodeInfo = (props) => {
           frameBorder={`0`}
           allowFullScreen={true}
         ></iframe>
+      </div>
+      <div className="flex w-full items-center justify-center">
+        <NextEpisode
+          seriesId={seriesId}
+          episodeDetails={episodeDetails}
+          totalEpisodes={TotalEpisodes}
+          totalSeasons={TotalSeasons}
+        />
       </div>
     </div>
   );
