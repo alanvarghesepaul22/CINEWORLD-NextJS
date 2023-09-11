@@ -33,7 +33,7 @@ function NextEpisodeBtn(props) {
           }`}
           className={`${
             Number(episodeDetails.season_number) == totalSeasons
-              ? `pointer-events-none bg-grey text-gray-400/25`
+              ? `pointer-events-none text-gray-500 bg-grey`
               : `bg-grey hover:bg-grey/75`
           }  transition-all text-primary/90 px-3 py-1 flex items-center justify-center rounded font-semibold text-xs md:text-sm gap-1`}
         >
@@ -48,11 +48,7 @@ function NextEpisodeBtn(props) {
               ? Number(episodeDetails.episode_number) + 1
               : Number(episodeDetails.episode_number)
           }`}
-          className={`${
-            Number(episodeDetails.episode_number) == totalEpisodes
-              ? `pointer-events-none bg-grey text-gray-400/25`
-              : `bg-grey hover:bg-grey/75`
-          }  transition-all text-primary/90 px-3 py-1 flex items-center justify-center rounded font-semibold text-xs md:text-sm gap-1`}
+          className={`transition-all text-primary/90 px-3 py-1 flex items-center justify-center rounded font-semibold text-xs md:text-sm gap-1`}
         >
           <p>Next Episode</p>
           <BiSkipNext className="text-lg md:text-2xl" />
@@ -76,7 +72,7 @@ function PrevEpisodeBtn(props) {
           }`}
           className={`${
             Number(episodeDetails.season_number) == 1
-              ? `pointer-events-none bg-grey text-gray-400/25`
+              ? `pointer-events-none text-gray-500 bg-grey `
               : `bg-grey hover:bg-grey/75`
           }  transition-all text-primary/90 px-3 py-1 flex items-center justify-center rounded font-semibold text-xs md:text-sm gap-1`}
         >
