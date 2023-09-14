@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { BiSearch } from "react-icons/bi";
+import Logo from "./Logo";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,13 +16,7 @@ const Header = () => {
       <nav className=" w-full fixed top-0 z-[100] bg-navbg shadow-sm shadow-slate-50/5 md:shadow-none">
         <div className="max-w-7xl flex items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
           {/* logo */}
-          <Link href="/">
-            <div>
-              <p className="bg-primary w-28 md:w-32 text-sm md:text-base py-1 px-2 my-5 text-bg-black font-extrabold text-center rounded-sm hover:bg-yellow-400">
-                CINEWORLD
-              </p>
-            </div>
-          </Link>
+          <Logo />
 
           {/* links */}
 
