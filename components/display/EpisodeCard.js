@@ -22,6 +22,7 @@ const EpisodeCard = (props) => {
             className="rounded w-full h-full"
             width={288}
             height={176}
+            unoptimized
           />
         </Link>
       </div>
