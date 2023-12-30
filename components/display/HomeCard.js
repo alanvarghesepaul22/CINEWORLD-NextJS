@@ -29,6 +29,7 @@ const HomeCards = (props) => {
           className="rounded w-full h-full"
           width={208}
           height={288}
+          unoptimized
         />
       </Link>
     </div>
