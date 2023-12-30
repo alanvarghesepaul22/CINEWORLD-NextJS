@@ -15,7 +15,6 @@ const SearchBar = ({ onSearch, onTyping }) => {
     onTyping(searchValue);
   };
 
-
   return (
     <>
       <div className=" flex place-content-center mt-10 mx-10">
@@ -27,6 +26,7 @@ const SearchBar = ({ onSearch, onTyping }) => {
           placeholder="Search...."
           className="text-light-white outline-none rounded-l-md bg-grey py-3 px-5 w-96"
           onChange={handleTyping}
+          autoComplete="off"
         />
         <div
           className="py-3 px-5 bg-primary rounded-r-md border-none"
