@@ -16,6 +16,7 @@ const SearchBar = ({ onSearch, onTyping }) => {
     onTyping(searchValue);
   };
 
+
   useEffect(() => {
     searchBarRef?.current?.focus?.();
   }, [])
@@ -34,6 +35,7 @@ const SearchBar = ({ onSearch, onTyping }) => {
           placeholder="Search...."
           className="text-light-white outline-none rounded-l-md bg-grey py-3 px-5 w-96"
           onChange={handleTyping}
+          autoComplete="off"
           ref={searchBarRef}
         />
         <div
