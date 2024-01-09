@@ -14,10 +14,11 @@ const EpisodeInfo = (props) => {
       <div className="pt-2 pb-8 flex justify-center">
         <iframe
           className="w-4/5 aspect-video sm: pr-4 pl-4"
-          src={`https://autoembed.to/tv/tmdb/${seriesId}-${episodeDetails.season_number}-${episodeDetails.episode_number}`}
+          src={`https://vidsrc.to/embed/tv/${seriesId}/${episodeDetails.season_number}/${episodeDetails.episode_number}`}
           frameBorder={`0`}
           allowFullScreen={true}
         ></iframe>
+        {/* src={`https://autoembed.to/tv/tmdb/${seriesId}-${episodeDetails.season_number}-${episodeDetails.episode_number}`} */}
       </div>
       <div className="flex w-full items-center justify-center">
         <NextEpisode
