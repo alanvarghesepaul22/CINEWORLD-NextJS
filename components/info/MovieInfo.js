@@ -13,12 +13,18 @@ const MovieInfo = (props) => {
       <div className="pt-2 pb-8 flex justify-center">
         <iframe
           className="w-4/5 aspect-video"
-          src={"https://vidsrc.to/embed/movie/" + id}
+          src={"https://v2.vidsrc.me/embed/" + id}
           title="YouTube video player"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen={true}
         ></iframe>
+        {/* working */}
+        {/* https://v2.vidsrc.me/embed/ */}
+        {/* https://vidsrc.to/embed/movie/ */}
+
+        {/* not working */}
+        {/* https://olgply.xyz/ */}
         {/* src={"https://autoembed.to/movie/tmdb/" + id} */}
       </div>
     </div>
