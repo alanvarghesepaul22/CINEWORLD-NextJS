@@ -9,10 +9,10 @@ const Logo = () => {
     md:text-base my-5 font-extrabold text-center"
     >
       <div className="bg-primary py-1 px-2 border border-primary ">
-        <p>CINE</p>
+        <p>PI</p>
       </div>
       <div className="border border-primary py-1 text-primary px-2 ">
-        <p>WORLD</p>
+        <p>STREAM</p>
       </div>
     </Link>
   );

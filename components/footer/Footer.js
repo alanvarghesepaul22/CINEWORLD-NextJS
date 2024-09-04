@@ -12,20 +12,13 @@ const Footer = () => {
           w-28 md:w-32 py-1 my-5 text-light-white font-semibold 
           text-center rounded-md"
           >
-            CINEWORLD
+            PISTREAM
           </p>
         </div>
       </Link>
       <p className="text-center text-light-white text-sm sm:text-base ">
-        Cineworld &copy; {new Date().getFullYear()}{" "}
+        pistream &copy; {new Date().getFullYear()}{" "}
       </p>
-
-      <Link
-        href="https://github.com/alanvarghesepaul22/CINEWORLD-NextJS"
-        target="_blank"
-      >
-        <AiFillGithub className="text-3xl text-light-white mr-4 hover:text-gray-500" />
-      </Link>
     </div>
   );
 };
