@@ -17,6 +17,9 @@ const Footer = () => {
         </div>
       </Link>
       <p className="text-center text-light-white text-sm sm:text-base ">
+        created by :igiraneza patrick
+      </p>
+      <p className="text-center text-light-white text-sm sm:text-base ">
         pistream &copy; {new Date().getFullYear()}{" "}
       </p>
     </div>
