@@ -2,7 +2,7 @@
 import MovieDisplay from "@/components/display/MovieDisplay";
 import SearchDisplay from "@/components/display/SearchDisplay";
 import HomeFilter from "@/components/filter/HomeFilter";
-import SearchBar from "@/components/searchbar/SearchBar"
+import SearchBar from "@/components/searchbar/SearchBar";
 import MoviesTitle from "@/components/title/MoviesTitle";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
