@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 const apiKey = process.env.API_KEY;
 async function getData() {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.TMDB_API_KEY;
   const resp = await fetch(
     `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=1`
   );
