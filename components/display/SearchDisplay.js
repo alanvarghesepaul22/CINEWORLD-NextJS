@@ -1,75 +1,45 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { BiSearch } from "react-icons/bi";
+import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
-const SearchBar = () => {
-  const searchBarRef = useRef(null);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [debounceTimeout, setDebounceTimeout] = useState(null);
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-
-  const fetchSuggestions = async (searchTerm) => {
-    if (!searchTerm) return setResults([]);
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${searchTerm}`
-    );
-    const data = await res.json();
-    setResults(data.results || []);
-  };
-
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-
-    clearTimeout(debounceTimeout);
-    const newTimeout = setTimeout(() => {
-      fetchSuggestions(value);
-    }, 300);
-    setDebounceTimeout(newTimeout);
-  };
-
-  useEffect(() => {
-    searchBarRef?.current?.focus?.();
-  }, []);
+const SearchDisplay = ({ movies }) => {
+  if (!movies || movies.length === 0) {
+    return <p className="text-center text-light-white py-6">No results found</p>;
+  }
 
   return (
-    <div className="relative flex flex-col items-center mt-6 px-4 w-full">
-      <div className="flex w-full sm:w-[400px] items-center">
-        <input
-          ref={searchBarRef}
-          type="text"
-          placeholder="Search for movies or series..."
-          value={query}
-          onChange={handleChange}
-          className="w-full rounded-l-md px-4 py-3 bg-grey text-white outline-none placeholder:text-light-white"
-        />
-        <button
-          aria-label="Search"
-          className="px-6 py-3 bg-primary text-black font-bold rounded-r-md hover:bg-yellow-300 transition"
-        >
-          <BiSearch className="text-2xl" />
-        </button>
-      </div>
+    <div className="grid gap-6 px-4 py-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {movies.map((movie) => {
+        const title = movie.title || movie.name;
+        const poster = movie.poster_path
+          ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+          : "https://i.imgur.com/wjVuAGb.png";
+        const overview = movie.overview?.length > 100
+          ? movie.overview.slice(0, 100) + "..."
+          : movie.overview;
 
-      {/* 🔍 Suggestion dropdown */}
-      {results.length > 0 && (
-        <div className="absolute top-full mt-2 w-full sm:w-[400px] max-h-60 overflow-y-auto bg-navbg border border-grey rounded-md shadow-lg z-50">
-          {results.slice(0, 8).map((item) => (
-            <Link
-              key={item.id}
-              href={`/${item.media_type}/${item.id}`}
-              className="block px-4 py-2 text-white hover:bg-grey transition"
-              onClick={() => setQuery("")}
-            >
-              {item.title || item.name}
-            </Link>
-          ))}
-        </div>
-      )}
+        return (
+          <Link href={`/watch/${movie.id}`} key={movie.id}>
+            <div className="bg-[#1c1c1c] rounded-lg shadow hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
+              <Image
+                src={poster}
+                alt={title}
+                width={300}
+                height={450}
+                className="w-full h-auto rounded-t-md object-cover"
+                unoptimized
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold mb-2 text-white">{title}</h3>
+                <p className="text-sm text-light-white">{overview}</p>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 };
 
-export default SearchBar;
+export default SearchDisplay;
