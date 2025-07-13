@@ -1,25 +1,35 @@
-// app/movie/page.jsx
+import TvDisplay from "@/components/display/TvDisplay";
+import HomeFilter from "@/components/filter/HomeFilter";
+import SearchBar from "@/components/searchbar/SearchBar";
+import TvTitle from "@/components/title/TvTitle";
 import React from "react";
-import MovieCards from "@/components/display/MovieCards";
 
-async function getPopularMovies() {
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US`);
-  const data = await res.json();
-  return data.results;
-}
-
-export default async function MoviePage() {
-  const movies = await getPopularMovies();
-
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-white mb-6">Popular Movies</h1>
-      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {movies.map((movie) => (
-          <MovieCards key={movie.id} MovieCard={movie} />
-        ))}
-      </div>
-    </div>
+async function getData() {
+  const apiKey = process.env.API_KEY;
+  const resp = await fetch(
+    `https://api.themoviedb.org/3/trending/tv/day?api_key=${apiKey}&page=1`
   );
+
+  if (!resp.ok) {
+    throw new Error("Failed to fetch data");
+  }
+  const data = await resp.json();
+  let res = data.results;
+  return res;
 }
+
+const Series = async () => {
+  const data = await getData();
+  return (
+    <>
+      <div className=" h-auto">
+        <TvTitle />
+        {/* <SearchBar />
+        <HomeFilter /> */}
+        <TvDisplay series={data} />
+      </div>
+    </>
+  );
+};
+
+export default Series;
