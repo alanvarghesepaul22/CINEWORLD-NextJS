@@ -1,32 +1,27 @@
-// app/page.js
-
-import HomeDisplay from "@/components/display/HomeDisplay";
-import HomeFilter from "@/components/filter/HomeFilter";
+import SectionRow from "@/components/display/SectionRow";
 import Title from "@/components/title/Title";
 
-async function getData() {
+async function getSection(url) {
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const resp = await fetch(
-    `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=1`
-  );
-
-  if (!resp.ok) {
-    throw new Error("Failed to fetch data");
-  }
-
-  const data = await resp.json();
+  const res = await fetch(`https://api.themoviedb.org/3${url}?api_key=${apiKey}&language=en-US`);
+  if (!res.ok) throw new Error("Failed to fetch");
+  const data = await res.json();
   return data.results;
 }
 
 export default async function Home() {
-  const data = await getData();
+  const [trendingMovies, trendingSeries, newReleases] = await Promise.all([
+    getSection("/trending/movie/week"),
+    getSection("/trending/tv/week"),
+    getSection("/movie/now_playing")
+  ]);
 
   return (
     <div className="h-auto">
       <Title />
-      {/* ✅ SearchBar removed — only exists on /search page now */}
-      <HomeFilter />
-      <HomeDisplay movies={data} />
+      <SectionRow title="Trending Movies" movies={trendingMovies} />
+      <SectionRow title="Trending Series" movies={trendingSeries} />
+      <SectionRow title="New Releases" movies={newReleases} />
     </div>
   );
 }
