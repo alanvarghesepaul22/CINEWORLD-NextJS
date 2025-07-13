@@ -5,7 +5,7 @@ import TvTitle from "@/components/title/TvTitle";
 import React from "react";
 
 async function getData() {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.TMDB_API_KEY;
   const resp = await fetch(
     `https://api.themoviedb.org/3/trending/tv/day?api_key=${apiKey}&page=1`
   );
