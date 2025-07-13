@@ -19,9 +19,9 @@ export default async function Home() {
   return (
     <div className="h-auto">
       <Title />
-      <SectionRow title="Trending Movies" movies={trendingMovies} />
-      <SectionRow title="Trending Series" movies={trendingSeries} />
-      <SectionRow title="New Releases" movies={newReleases} />
+      <SectionRow title="Trending Movies" movies={trendingMovies} link="/trending/movie" />
+      <SectionRow title="Trending Series" movies={trendingSeries} link="/trending/tv" />
+      <SectionRow title="New Releases" movies={newReleases} link="/new-releases" />
     </div>
   );
 }
