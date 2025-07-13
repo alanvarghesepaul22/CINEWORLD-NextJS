@@ -42,6 +42,7 @@ export default async function WatchPage({ params }) {
       <p className="text-light-white mb-6">{media.overview}</p>
 
       <div className="flex flex-wrap gap-4">
+        {/* ✅ Download Button */}
         <a
           href={downloadLink}
           target="_blank"
@@ -51,6 +52,7 @@ export default async function WatchPage({ params }) {
           ⬇ Download
         </a>
 
+        {/* ✅ Favorite Button */}
         <button
           onClick={() => {
             const key = `cine-fav-${media.id}`;
