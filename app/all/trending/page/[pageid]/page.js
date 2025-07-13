@@ -4,7 +4,7 @@ import SearchBar from "@/components/searchbar/SearchBar";
 import Title from "@/components/title/Title";
 
 export async function getData(pageid) {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.TMDB_API_KEY;
   if (pageid < 1) {
     pageid = 1;
   }
