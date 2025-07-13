@@ -21,9 +21,23 @@ export default async function Home() {
   return (
     <div className="h-auto">
       <Title />
-      <HorizontalSection title="Trending Movies" movies={trendingMovies} />
-      <HorizontalSection title="Trending Series" movies={trendingSeries} />
-      <HorizontalSection title="New Releases" movies={newReleases} />
+      <HorizontalSection
+        title="Trending Movies"
+        movies={trendingMovies}
+        type="movie"
+        link="/trending/movie"
+      />
+      <HorizontalSection
+        title="Trending Series"
+        movies={trendingSeries}
+        type="tv"
+        link="/trending/tv"
+      />
+      <HorizontalSection
+        title="New Releases"
+        movies={newReleases}
+        type="movie"
+      />
     </div>
   );
 }
