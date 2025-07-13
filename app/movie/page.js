@@ -1,40 +1,35 @@
 "use client";
-
 import MovieDisplay from "@/components/display/MovieDisplay";
+import SearchDisplay from "@/components/display/SearchDisplay";
+import HomeFilter from "@/components/filter/HomeFilter";
+import SearchBar from "@/components/searchbar/SearchBar";
 import MoviesTitle from "@/components/title/MoviesTitle";
 import React, { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
+const apiKey = process.env.API_KEY;
+async function getData() {
+  const apiKey = process.env.API_KEY;
+  const resp = await fetch(
+    `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=1`
+  );
 
-const Movies = () => {
-  const [movies, setMovies] = useState([]);
-  const [error, setError] = useState(null);
+  if (!resp.ok) {
+    throw new Error("Failed to fetch data");
+  }
+  const data = await resp.json();
+  let res = data.results;
+  return res;
+}
 
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const resp = await fetch(
-          `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=1`
-        );
-        if (!resp.ok) throw new Error("Failed to fetch data");
-        const data = await resp.json();
-        setMovies(data.results);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    getData();
-  }, [apiKey]);
+const Movies = async () => {
+  const moviedata = await getData();
 
   return (
-    <div className="h-auto">
+    <div className=" h-auto">
       <MoviesTitle />
-      {error ? (
-        <p className="text-red-500 text-center mt-4">{error}</p>
-      ) : (
-        <MovieDisplay movies={movies} />
-      )}
+      {/* <SearchBar />
+      <HomeFilter /> */}
+      <MovieDisplay movies={moviedata} />
     </div>
   );
 };
