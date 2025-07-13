@@ -2,11 +2,10 @@
 
 import HomeDisplay from "@/components/display/HomeDisplay";
 import HomeFilter from "@/components/filter/HomeFilter";
-import SearchBar from "@/components/searchbar/SearchBar";
 import Title from "@/components/title/Title";
 
 async function getData() {
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY; // Use NEXT_PUBLIC prefix for .env access
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const resp = await fetch(
     `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=1`
   );
@@ -25,8 +24,8 @@ export default async function Home() {
   return (
     <div className="h-auto">
       <Title />
-      {/* <SearchBar />
-      <HomeFilter /> */}
+      {/* ✅ SearchBar removed — only exists on /search page now */}
+      <HomeFilter />
       <HomeDisplay movies={data} />
     </div>
   );
