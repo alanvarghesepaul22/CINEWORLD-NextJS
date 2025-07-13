@@ -6,10 +6,12 @@ const HomeDisplay = (props) => {
   let { movies, pageid } = props;
   return (
     <>
-      <div className="flex flex-wrap justify-center py-10 px-5">
-        {movies.map((movie) => {
-          return <HomeCards key={movie.id} MovieCard={movie} />;
-        })}
+      <div className="flex overflow-x-auto space-x-4 snap-x snap-mandatory px-5 pb-6 scrollbar-hide">
+        {movies.map((movie) => (
+          <div key={movie.id} className="snap-start shrink-0">
+            <HomeCards MovieCard={movie} />
+          </div>
+        ))}
       </div>
       <HomePagination pageid={pageid} />
     </>
