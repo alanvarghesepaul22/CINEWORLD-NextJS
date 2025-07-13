@@ -26,8 +26,8 @@ export default function FavoritesPage() {
   if (favorites.length === 0) {
     return (
       <div className="p-6 text-white text-center">
-        <h1 className="text-2xl font-bold mb-2">Your Favorites</h1>
-        <p>You haven’t added any favorites yet.</p>
+        <h1 className="text-3xl font-bold mb-4">Your Favorites</h1>
+        <p className="text-lg text-light-white">No movies or shows added yet.</p>
       </div>
     );
   }
@@ -35,29 +35,32 @@ export default function FavoritesPage() {
   return (
     <div className="p-6 text-white">
       <h1 className="text-3xl font-bold mb-6">Your Favorites ❤️</h1>
-      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {favorites.map((item) => (
-          <div key={item.id} className="bg-grey rounded shadow-md">
+          <div
+            key={item.id}
+            className="bg-grey rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300"
+          >
             <Image
               src={`https://image.tmdb.org/t/p/w342${item.poster}`}
               alt={item.title}
               width={300}
               height={450}
-              className="rounded-t w-full object-cover"
+              className="w-full h-[400px] object-cover"
               unoptimized
             />
-            <div className="p-4">
-              <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
+            <div className="p-4 flex flex-col justify-between gap-3">
+              <h2 className="text-lg font-semibold truncate">{item.title}</h2>
               <div className="flex gap-2">
                 <Link
                   href={`/watch/${item.id}`}
-                  className="bg-primary text-black px-4 py-1 rounded hover:bg-yellow-400 transition"
+                  className="flex-1 text-center bg-primary text-black font-semibold py-2 rounded hover:bg-yellow-400 transition"
                 >
                   ▶ Watch
                 </Link>
                 <button
                   onClick={() => removeFavorite(item.id)}
-                  className="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 transition"
+                  className="flex-1 text-center bg-white text-black font-semibold py-2 rounded hover:bg-red-500 hover:text-white transition"
                 >
                   ❌ Remove
                 </button>
