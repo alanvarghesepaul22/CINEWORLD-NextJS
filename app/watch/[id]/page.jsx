@@ -1,21 +1,47 @@
+// app/watch/[id]/page.jsx
+
 import React from "react";
 
+// Force SSR on dynamic routes (Next.js App Router)
+export const dynamic = "force-dynamic";
+
 async function getData(id) {
-  const apiKey = process.env.TMDB_API_KEY;
-  const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=en-US`);
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
-  // Try movie first, if not found, try TV
-  if (res.ok) return { ...(await res.json()), type: "movie" };
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=en-US`);
+    if (res.ok) {
+      const data = await res.json();
+      return { ...data, type: "movie" };
+    }
 
-  const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${apiKey}&language=en-US`);
-  if (tvRes.ok) return { ...(await tvRes.json()), type: "tv" };
+    const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${apiKey}&language=en-US`);
+    if (tvRes.ok) {
+      const data = await tvRes.json();
+      return { ...data, type: "tv" };
+    }
 
-  throw new Error("Failed to fetch media");
+    throw new Error("Media not found");
+  } catch (error) {
+    console.error("Error fetching media:", error.message);
+    throw error;
+  }
 }
 
 export default async function WatchPage({ params }) {
   const { id } = params;
-  const media = await getData(id);
+
+  let media;
+  try {
+    media = await getData(id);
+  } catch (error) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        <h1 className="text-2xl font-bold mb-4">Movie Not Found</h1>
+        <p className="text-lg">Error: {error.message}</p>
+      </div>
+    );
+  }
 
   const src = media.type === "movie"
     ? `https://vidsrc.to/embed/movie/${id}`
