@@ -1,30 +1,25 @@
-import TvInfo from "@/components/info/TvInfo";
+// app/series/page.jsx
+import React from "react";
+import MovieCards from "@/components/display/MovieCards";
 
-export async function getData(id) {
-  const apiKey = process.env.API_KEY;
-  const res = await fetch(
-    `https://api.themoviedb.org/3/tv/${id}?api_key=${apiKey}`
-  );
-  let data = await res.json();
-  let genreArr = [];
-
-  data.genres.map((element) => {
-    genreArr.push(element.name);
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to Fetch data");
-  }
-
-  return { data, genreArr, id };
+async function getPopularSeries() {
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const res = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=en-US`);
+  const data = await res.json();
+  return data.results;
 }
-const TvDetail = async ({ params }) => {
-  let { data, genreArr, id } = await getData(params.id);
-  return (
-    <>
-      <TvInfo TvDetail={data} genreArr={genreArr} id={id} />
-    </>
-  );
-};
 
-export default TvDetail;
+export default async function SeriesPage() {
+  const series = await getPopularSeries();
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold text-white mb-6">Popular Series</h1>
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {series.map((item) => (
+          <MovieCards key={item.id} MovieCard={item} />
+        ))}
+      </div>
+    </div>
+  );
+}

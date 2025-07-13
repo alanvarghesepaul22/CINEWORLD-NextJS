@@ -1,31 +1,43 @@
-import HomeDisplay from "@/components/display/HomeDisplay";
-import HomeFilter from "@/components/filter/HomeFilter";
-import SearchBar from "@/components/searchbar/SearchBar";
+import HorizontalSection from "@/components/display/HorizontalSection";
+import HeroBanner from "@/components/display/HeroBanner";
 import Title from "@/components/title/Title";
 
-async function getData() {
-  const apiKey = process.env.API_KEY;
-  const resp = await fetch(
-    // `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`
-    `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=1`
+async function getSection(url) {
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const res = await fetch(
+    `https://api.themoviedb.org/3${url}?api_key=${apiKey}&language=en-US`
   );
-
-  if (!resp.ok) {
-    throw new Error("Failed to fetch data");
-  }
-  const data = await resp.json();
-  let res = data.results;
-  return res;
+  const data = await res.json();
+  return data.results;
 }
 
 export default async function Home() {
-  const data = await getData();
+  const [trendingMovies, trendingSeries, newReleases] = await Promise.all([
+    getSection("/trending/movie/week"),
+    getSection("/trending/tv/week"),
+    getSection("/movie/now_playing"),
+  ]);
+
+  const featured = trendingMovies[0]; // pick first movie
+
   return (
-    <div className=" h-auto">
+    <div className="h-auto">
+      <HeroBanner movie={featured} />
       <Title />
-      {/* <SearchBar />
-      <HomeFilter /> */}
-      <HomeDisplay movies={data} />
+      <HorizontalSection
+        title="Trending Movies"
+        movies={trendingMovies}
+        link="/trending/movie"
+      />
+      <HorizontalSection
+        title="Trending Series"
+        movies={trendingSeries}
+        link="/trending/tv"
+      />
+      <HorizontalSection
+        title="New Releases"
+        movies={newReleases}
+      />
     </div>
   );
 }

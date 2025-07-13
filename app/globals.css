@@ -2,8 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* 🔹 Body Styling */
 body {
+  @apply text-white;
   background-image: linear-gradient(to top, #141414 0%, rgb(8, 8, 8) 100%);
-  /* background-image: linear-gradient(to bottom, #09203f 0%, #242222 100%); */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevents horizontal scroll on mobile */
+}
+
+/* 🔹 HTML Tweaks */
+html {
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+/* 🔹 Hide Scrollbars Globally */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari */
+}
+
+/* 🔹 Universal Image Fix */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 🔹 Optional: Search dropdown styling */
+.suggestion-item {
+  @apply block px-4 py-2 text-white hover:bg-grey transition;
 }

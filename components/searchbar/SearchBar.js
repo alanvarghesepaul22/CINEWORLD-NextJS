@@ -13,40 +13,34 @@ const SearchBar = ({ onSearch, onTyping }) => {
   const handleTyping = (e) => {
     e.preventDefault();
     setSearchValue(e.target.value);
-    onTyping(searchValue);
+    onTyping(e.target.value); // use actual input here
   };
-
 
   useEffect(() => {
     searchBarRef?.current?.focus?.();
-  }, [])
+  }, []);
 
   return (
-    <>
-      <div className="flex place-content-center mt-10 mx-10">
-        <label htmlFor="search" className="sr-only">
-          Search
-        </label>
-        <input
-          value={searchValue}
-          type="text"
-          name="search"
-          id="search"
-          placeholder="Search...."
-          className="text-light-white outline-none rounded-l-md bg-grey py-3 px-5 w-96"
-          onChange={handleTyping}
-          autoComplete="off"
-          ref={searchBarRef}
-        />
-        <div
-          aria-label="Search"
-          className="py-3 px-5 bg-primary rounded-r-md border-none"
-          onClick={handleSearch}
-        >
-          <BiSearch className="text-2xl text-bg-black  cursor-pointer stroke-0" />
-        </div>
-      </div>
-    </>
+    <div className="flex flex-col sm:flex-row items-center justify-center mt-6 px-4 gap-2 w-full">
+      <input
+        value={searchValue}
+        type="text"
+        name="search"
+        id="search"
+        placeholder="Search for movies or series..."
+        className="w-full sm:w-[400px] rounded-md px-4 py-3 bg-grey text-white outline-none placeholder:text-light-white"
+        onChange={handleTyping}
+        autoComplete="off"
+        ref={searchBarRef}
+      />
+      <button
+        aria-label="Search"
+        onClick={handleSearch}
+        className="w-full sm:w-auto px-6 py-3 bg-primary text-black font-bold rounded-md hover:bg-yellow-300 transition"
+      >
+        <BiSearch className="inline text-2xl" />
+      </button>
+    </div>
   );
 };
 
