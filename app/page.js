@@ -1,5 +1,5 @@
-// app/page.js
 import HorizontalSection from "@/components/display/HorizontalSection";
+import HeroBanner from "@/components/display/HeroBanner";
 import Title from "@/components/title/Title";
 
 async function getSection(url) {
@@ -18,25 +18,25 @@ export default async function Home() {
     getSection("/movie/now_playing"),
   ]);
 
+  const featured = trendingMovies[0]; // pick first movie
+
   return (
     <div className="h-auto">
+      <HeroBanner movie={featured} />
       <Title />
       <HorizontalSection
         title="Trending Movies"
         movies={trendingMovies}
-        type="movie"
         link="/trending/movie"
       />
       <HorizontalSection
         title="Trending Series"
         movies={trendingSeries}
-        type="tv"
         link="/trending/tv"
       />
       <HorizontalSection
         title="New Releases"
         movies={newReleases}
-        type="movie"
       />
     </div>
   );
