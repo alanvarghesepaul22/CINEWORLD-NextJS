@@ -4,7 +4,7 @@ import SearchBar from "@/components/searchbar/SearchBar";
 import Title from "@/components/title/Title";
 
 async function getData() {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.TMDB_API_KEY;
   const resp = await fetch(
     // `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`
     `https://api.themoviedb.org/3/trending/all/day?api_key=${apiKey}&page=1`
