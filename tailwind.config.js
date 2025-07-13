@@ -1,10 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./app/**/*.{js,jsx}", "./components/**/*.{js,jsx}"],
   theme: {
     extend: {
       backgroundImage: {
@@ -19,9 +15,9 @@ module.exports = {
         white: "#ffffff",
         grey: "#1D1B1B",
         "light-white": "#6D6B6B",
-        "navbg":"rgb(8, 8, 8)"
+        navbg: "rgb(8, 8, 8)",
       },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/aspect-ratio")],
 };
