@@ -23,7 +23,7 @@ const SearchBar = ({ onSearch, onTyping }) => {
 
   return (
     <>
-      <div className="flex place-content-center mt-10 mx-10">
+      <div className="flex justify-center flex-wrap gap-2 mt-10 mx-4">
         <label htmlFor="search" className="sr-only">
           Search
         </label>
@@ -33,7 +33,7 @@ const SearchBar = ({ onSearch, onTyping }) => {
           name="search"
           id="search"
           placeholder="Search...."
-          className="text-light-white outline-none rounded-l-md bg-grey py-3 px-5 w-96"
+          className="text-light-white outline-none rounded-l-md bg-grey py-3 px-5 w-full max-w-md"
           onChange={handleTyping}
           autoComplete="off"
           ref={searchBarRef}
