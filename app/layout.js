@@ -6,7 +6,7 @@ import Footer from "@/components/footer/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "PiStream",
+  title: "PiStream free movie streaming",
   description: "A World of Cinema",
 };
 
