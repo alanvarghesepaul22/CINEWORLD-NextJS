@@ -12,7 +12,7 @@ const Footer = () => {
           w-28 md:w-32 py-1 my-5 text-light-white font-semibold 
           text-center rounded-md"
           >
-            PISTREAM
+            PISTREAM free movie streaming
           </p>
         </div>
       </Link>
