@@ -1,12 +1,11 @@
 # Welcome to CineWorld! The World of Cinema.
-CineWorld is a movie and tv shows streaming website created using TMDB API in React-Next JS Framework and Tailwind CSS.
+CineWorld is a modern movie and TV show discovery website built with TypeScript, Next.js 15, and Tailwind CSS, featuring TMDB API integration.
 
 ## Overview
 
-Cineworld is a dynamic and immersive movie streaming website that brings you an extensive collection of films from various genres. Powered by React, Next.js, and Tailwind CSS, Cineworld offers an unparalleled user experience, providing movie enthusiasts with a seamless and entertaining journey through the world of cinema.
+Cineworld is a dynamic and immersive movie and TV show discovery platform that brings you information about an extensive collection of films and TV shows from various genres. Powered by React, Next.js 15, TypeScript, and Tailwind CSS, Cineworld offers an unparalleled user experience with modern UI components, responsive design, and smooth animations.
 
-##Screenshots
-
+## Screenshots
 ![Screenshot 2023-07-13 230452](https://github.com/alanvarghesepaul22/CINEWORLD-NextJS/assets/86376232/965879a8-9604-4b77-a83c-026f594a2e21)
 
 ![Screenshot 2023-07-21 211717](https://github.com/alanvarghesepaul22/CINEWORLD-NextJS/assets/86376232/fae66266-2242-4311-9f53-8258c644b030)
@@ -18,15 +17,15 @@ Cineworld is a dynamic and immersive movie streaming website that brings you an 
 
 ## Key Features
 
-- **Vast Movie Collection**: Explore a diverse selection of movies and tv shows, ranging from classics to the latest releases, all conveniently accessible in one place.
-
-- **User-friendly Interface**: Enjoy a sleek and intuitive design that ensures a smooth and enjoyable browsing experience.
-
-- **Data-driven Content**: Cineworld utilizes the TMDB API to provide up-to-date movie information, including posters, summaries, and ratings.
-
-- **Responsive Design**: Access Cineworld from any device, as the website is fully responsive and optimized for mobile, tablet, and desktop.
-
-- **Fast Loading**: Built with Next.js 13, Cineworld boasts lightning-fast loading times, reducing waiting times for an optimal user experience.
+- **🎬 Vast Content Library**: Explore movies and TV shows from trending, popular, top-rated, and latest categories
+- **🎨 Modern UI/UX**: Beautiful hero section with animated slides, Shadcn/ui components, and smooth Framer Motion animations
+- **📱 Fully Responsive**: Optimized for mobile, tablet, and desktop with 2-column mobile grid layout
+- **⚡ Performance Optimized**: Next.js 15 with App Router, SWR caching, and TypeScript for fast loading
+- **🎯 Advanced Search**: Enhanced search functionality with filters (coming in future updates)
+- **❤️ Watchlist**: Save favorite movies and TV shows to local storage
+- **🔔 Error Handling**: Graceful error handling with toast notifications
+- **🎭 Category Sections**: Browse by Popular, Top Rated, Now Playing, and more with "See All" links
+- **🔒 Production Ready**: Secure API key handling, environment variable configuration
 
 ## Installation and Setup
 
@@ -43,11 +42,19 @@ cd CINEWORLD-NextJS
 npm install
 ```
 
-3. Create a `.env.local` file in the root directory and add your TMDB API key:
+3. Set up environment variables:
 
-```plaintext
-API_KEY=your_tmdb_api_key
-```
+   - Copy `.env.example` to `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   - Get your free TMDB API key from [https://www.themoviedb.org/settings/api](https://www.themoviedb.org/settings/api)
+
+   - Update `.env.local` with your API key:
+   ```plaintext
+   API_KEY=your_actual_API_KEY_here
+   ```
 
 4. Run the development server:
 
@@ -59,13 +66,46 @@ npm run dev
 
 ## Tech Stack
 
-- React
-- Next.js 13
-- Tailwind CSS
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 3.4
+- **UI Components**: Shadcn/ui + Radix UI
+- **Animations**: Framer Motion
+- **State Management**: SWR (for API caching)
+- **Icons**: Lucide React
+- **API**: TMDB API
+- **Notifications**: Sonner
 
-## Deployment
+## Production Deployment
 
-Cineworld is deployed using [Vercel](https://vercel.com/). Any changes pushed to the `main` branch will trigger an automatic deployment.
+### Environment Variables
+For production deployment, set the following environment variable on your hosting platform:
+
+```plaintext
+API_KEY=your_actual_API_KEY_here
+```
+
+### Recommended Platforms
+
+#### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add the `API_KEY` environment variable in Vercel's dashboard
+3. Deploy automatically on every push to main branch
+
+#### Netlify
+1. Connect your repository
+2. Set environment variables in build settings
+3. Configure build command: `npm run build`
+
+#### Railway / Render
+1. Connect your repository
+2. Set environment variables in service settings
+3. Deploy with default Next.js settings
+
+### Security Notes
+- Never commit API keys to version control
+- Use environment variables for all sensitive data
+- The API key is only used server-side for security
 
 ## Contributing
 
