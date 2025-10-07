@@ -31,6 +31,10 @@ export function useWatchlist() {
     const updated = [...watchlist, watchlistItem];
     setWatchlist(updated);
     localStorage.setItem('watchlist', JSON.stringify(updated));
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('watchlistChanged'));
+    
     toast.success('Added to watchlist');
   };
 
@@ -38,6 +42,10 @@ export function useWatchlist() {
     const updated = watchlist.filter(item => item.id !== id);
     setWatchlist(updated);
     localStorage.setItem('watchlist', JSON.stringify(updated));
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('watchlistChanged'));
+    
     toast.success('Removed from watchlist');
   };
 

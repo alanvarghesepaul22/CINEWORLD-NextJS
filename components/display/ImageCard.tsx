@@ -18,7 +18,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ mediaDetail }) => {
     <div className="w-52 h-72 bg-grey m-3">
       <Image
         src={poster_path}
-        alt={mediaDetail.title || mediaDetail.name || 'Untitled content'}
+        alt={`${mediaDetail.title || mediaDetail.name || 'Untitled'} poster image`}
         className="rounded w-full h-full"
         width={208}
         height={288}

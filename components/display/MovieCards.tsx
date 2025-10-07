@@ -22,7 +22,7 @@ const MovieCards: React.FC<MovieCardsProps> = ({ MovieCard }) => {
       >
         <Image
           src={poster_path}
-          alt={MovieCard.title}
+          alt={`${MovieCard.title} movie poster`}
           className="rounded w-full h-full"
           width={208}
           height={288}

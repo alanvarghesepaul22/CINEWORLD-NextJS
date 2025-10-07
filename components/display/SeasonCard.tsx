@@ -22,7 +22,7 @@ const SeasonCard: React.FC<SeasonCardProps> = ({ SeasonDetails, SeriesId }) => {
         <Link href="/series/[id]/season/[seasonid]" as={`/series/${SeriesId}/season/${SeasonDetails.season_number}`} title={SeasonDetails.name}>
           <Image
             src={poster_path}
-            alt={SeasonDetails.name}
+            alt={`${SeasonDetails.name} season poster`}
             className="rounded w-full h-full"
             width={208}
             height={288}

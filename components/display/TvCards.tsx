@@ -21,7 +21,7 @@ const TvCards: React.FC<TvCardsProps> = ({ seriesData }) => {
       >
         <Image
           src={poster_path}
-          alt={seriesData.name}
+          alt={`${seriesData.name} TV series poster`}
           className="rounded w-full h-full"
           width={208}
           height={288}

@@ -18,7 +18,7 @@ interface MovieInfoProps {
 }
 
 const MovieInfo = (props: MovieInfoProps) => {
-  let { MovieDetail, genreArr, id } = props;
+  const { MovieDetail, genreArr, id } = props;
   // …
   const { getProgress, markAsWatched, startOver, isWatched } = useResume();
   const progress = getProgress(Number(MovieDetail.id), 'movie');

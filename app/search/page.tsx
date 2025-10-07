@@ -1,140 +1,194 @@
 "use client";
 import SearchDisplay from "@/components/display/SearchDisplay";
-import Filter from "@/components/filter/Filter";
+import FilterWrapper from "@/components/filter/FilterWrapper";
 import SearchBar from "@/components/searchbar/SearchBar";
-import SearchTitle from "@/components/title/SearchTitle";
-import React, { useEffect, useState, useMemo } from "react";
+import PageTitle from "@/components/title/PageTitle";
+import React, { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { TMDBMovie, TMDBTVShow, TMDBGenre } from "@/lib/types";
+import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 import { api } from "@/lib/api";
 
+type ContentSource = 'search' | 'filter' | 'none';
+
 const Search: React.FC = () => {
-  const [data, setData] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
+  // Search-related state
+  const [searchResults, setSearchResults] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
   const [typedValue, setTypedValue] = useState<string>("");
-  const [genres, setGenres] = useState<TMDBGenre[]>([]);
-  const [filters, setFilters] = useState({
-    genre: "",
-    mediaType: "",
-    year: "",
-    minRating: "",
-  });
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
-  // Fetch genres on mount
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const movieGenres = await api.getGenres('movie');
-        const tvGenres = await api.getGenres('tv');
-        // Combine and deduplicate
-        const allGenres = [...movieGenres.genres, ...tvGenres.genres];
-        const uniqueGenres = allGenres.filter((genre, index, self) =>
-          index === self.findIndex(g => g.id === genre.id)
-        );
-        setGenres(uniqueGenres);
-      } catch (error) {
-        console.error('Failed to fetch genres:', error);
-      }
-    };
-    fetchGenres();
-  }, []);
+  // Filter-related state
+  const [filterResults, setFilterResults] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [filterError, setFilterError] = useState<string | null>(null);
 
-  // This is triggered when user starts typing in search bar
-  const handleTyping = (typedValue: string) => {
-    setTypedValue(typedValue);
-  };
+  // Display state - determines which results to show
+  const [activeSource, setActiveSource] = useState<ContentSource>('none');
+  const [displayResults, setDisplayResults] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
 
-  const [value] = useDebounce(typedValue, 1000);
+  // Debounced search value
+  const [debouncedSearchValue] = useDebounce(typedValue, 1000);
 
+  /**
+   * Handle search functionality - completely independent of filters
+   */
   useEffect(() => {
     const performSearch = async () => {
-      if (value !== "") {
-        try {
-          const result = await api.search(value);
-          setData(result.results);
-        } catch (error) {
-          console.error('Search failed:', error);
-          setData([]);
+      if (debouncedSearchValue.trim() === "") {
+        setSearchResults([]);
+        setSearchError(null);
+        if (activeSource === 'search') {
+          setActiveSource('none');
+          setDisplayResults([]);
         }
-      } else {
-        setData([]);
+        return;
+      }
+
+      setIsSearching(true);
+      setSearchError(null);
+
+      try {
+        const result = await api.search(debouncedSearchValue);
+        setSearchResults(result.results);
+        setActiveSource('search');
+        setDisplayResults(result.results);
+        
+        if (result.results.length === 0) {
+          setSearchError(`No results found for "${debouncedSearchValue}"`);
+        }
+      } catch (error) {
+        console.error('Search failed:', error);
+        setSearchError('Search failed. Please try again.');
+        setSearchResults([]);
+        if (activeSource === 'search') {
+          setActiveSource('none');
+          setDisplayResults([]);
+        }
+      } finally {
+        setIsSearching(false);
       }
     };
+
     performSearch();
-  }, [value]);
+  }, [debouncedSearchValue, activeSource]);
 
-  // Filter the data based on filters
-  const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      if (filters.genre && !item.genre_ids?.includes(parseInt(filters.genre))) {
-        return false;
-      }
-      const mediaType = 'title' in item ? 'movie' : 'tv';
-      if (filters.mediaType && mediaType !== filters.mediaType) {
-        return false;
-      }
-      const year = 'release_date' in item ? item.release_date : item.first_air_date;
-      if (filters.year && year && !year.startsWith(filters.year)) {
-        return false;
-      }
-      if (filters.minRating && (item.vote_average || 0) < parseFloat(filters.minRating)) {
-        return false;
-      }
-      return true;
-    });
-  }, [data, filters]);
-
-  const handleFilterChange = (filterKey: string, value: string) => {
-    setFilters(prev => ({ ...prev, [filterKey]: value }));
+  /**
+   * Handle search input changes
+   */
+  const handleSearchInput = (value: string) => {
+    setTypedValue(value);
   };
 
-  const genreOptions = genres.map(genre => ({ value: genre.id.toString(), label: genre.name }));
-  const mediaTypeOptions = [
-    { value: "movie", label: "Movie" },
-    { value: "tv", label: "TV Show" },
-  ];
-  const yearOptions = Array.from({ length: 30 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
-    return { value: year.toString(), label: year.toString() };
-  });
-  const ratingOptions = [
-    { value: "7", label: "7+" },
-    { value: "8", label: "8+" },
-    { value: "9", label: "9+" },
-  ];
+  /**
+   * Handle filter results from FilterWrapper
+   */
+  const handleFilterResults = (results: (TMDBMovie | TMDBTVShow)[]) => {
+    setFilterResults(results);
+    setActiveSource('filter');
+    setDisplayResults(results);
+  };
+
+  /**
+   * Handle filter loading state
+   */
+  const handleFilterLoading = (isLoading: boolean) => {
+    setIsFiltering(isLoading);
+  };
+
+  /**
+   * Handle filter errors
+   */
+  const handleFilterError = (error: string | null) => {
+    setFilterError(error);
+  };
+
+  /**
+   * Determine loading state based on active source
+   */
+  const isLoading = activeSource === 'search' ? isSearching : isFiltering;
+
+  /**
+   * Determine error message based on active source
+   */
+  const currentError = activeSource === 'search' ? searchError : filterError;
+
+  /**
+   * Get status message for display
+   */
+  const getStatusMessage = (): string | null => {
+    if (currentError) return currentError;
+    
+    if (activeSource === 'search' && searchResults.length > 0) {
+      return `Found ${searchResults.length} result(s) for "${debouncedSearchValue}"`;
+    }
+    
+    if (activeSource === 'filter' && filterResults.length > 0) {
+      return `Discovered ${filterResults.length} content item(s)`;
+    }
+    
+    return null;
+  };
 
   return (
-    <div className="h-full">
-      <SearchTitle />
-      <SearchBar onTyping={handleTyping} />
-      <div className="flex justify-center mt-5">
-        <div className="flex flex-wrap gap-3">
-          <Filter
-            label="Genre"
-            options={genreOptions}
-            value={filters.genre}
-            onChange={(value) => handleFilterChange('genre', value)}
-          />
-          <Filter
-            label="Type"
-            options={mediaTypeOptions}
-            value={filters.mediaType}
-            onChange={(value) => handleFilterChange('mediaType', value)}
-          />
-          <Filter
-            label="Year"
-            options={yearOptions}
-            value={filters.year}
-            onChange={(value) => handleFilterChange('year', value)}
-          />
-          <Filter
-            label="Min Rating"
-            options={ratingOptions}
-            value={filters.minRating}
-            onChange={(value) => handleFilterChange('minRating', value)}
-          />
-        </div>
+    <div className="app-bg-enhanced mt-24">
+      <div className="container mx-auto px-4 pb-12">
+        <PageTitle segments={[
+          { text: "Explore, Discover, and" },
+          { text: " Watch", isPrimary: true }
+        ]} />
+        
+        {/* Search Bar Section */}
+        <SearchBar onTyping={handleSearchInput} />
+        
+        {/* Filter Section - Independent of search */}
+        <FilterWrapper 
+          onResultsChange={handleFilterResults}
+          onLoadingChange={handleFilterLoading}
+          onErrorChange={handleFilterError}
+        />
+
+        {/* Status Message */}
+        {getStatusMessage() && (
+          <div className="flex justify-center mb-6">
+            <div className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              currentError 
+                ? 'bg-red-900/50 text-red-300 border border-red-700' 
+                : 'bg-primary/20 text-primary border border-primary/30'
+            }`}>
+              {getStatusMessage()}
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="flex items-center gap-3 text-gray-400">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <span>
+                {activeSource === 'search' ? 'Searching...' : 'Discovering content...'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Results Display */}
+        {!isLoading && displayResults.length > 0 && (
+          <SearchDisplay movies={displayResults} />
+        )}
+
+        {/* Empty State */}
+        {!isLoading && activeSource === 'none' && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="text-gray-400 text-lg mb-2">
+              Ready to discover amazing content?
+            </div>
+            <div className="text-gray-500 text-sm">
+              Use the search bar above or apply filters to find movies and TV shows
+            </div>
+          </div>
+        )}
       </div>
-      <SearchDisplay movies={filteredData} />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
-import HomeCards from "./HomeCard";
-
+import MediaCard from "./MediaCard";
+import ResponsiveGrid from "../layout/ResponsiveGrid";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 
 interface SearchDisplayProps {
@@ -9,13 +9,15 @@ interface SearchDisplayProps {
 
 const SearchDisplay: React.FC<SearchDisplayProps> = ({ movies }) => {
   return (
-    <>
-      <div className="flex flex-wrap justify-center py-10 px-5 min-h-screen">
-        {movies?.map((movie) => {
-          return <HomeCards key={movie.id} MovieCard={movie} />;
-        })}
-      </div>
-    </>
+    <ResponsiveGrid minHeight={true}>
+      {movies?.map((movie) => (
+        <MediaCard 
+          key={movie.id} 
+          media={movie} 
+          variant="grid"
+        />
+      ))}
+    </ResponsiveGrid>
   );
 };
 

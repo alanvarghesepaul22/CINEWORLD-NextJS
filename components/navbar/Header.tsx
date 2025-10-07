@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { BiSearch } from "react-icons/bi";
+import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
 
 const Header: React.FC = () => {
@@ -12,101 +13,102 @@ const Header: React.FC = () => {
   };
 
   return (
-    <nav className="w-full fixed top-0 z-[100] bg-navbg shadow-sm shadow-slate-50/5 md:shadow-none">
-      <div className="max-w-7xl flex items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="w-full fixed top-0 z-[100] bg-black/80 backdrop-blur-md border-b border-gray-800/50 shadow-2xl shadow-black/20">
+      <div className="max-w-7xl flex items-center justify-between mx-auto px-4 sm:px-6 lg:px-8 h-16">
         {/* logo */}
         <Logo />
 
-        {/* links */}
-
+        {/* Desktop Navigation Links */}
         <div className="hidden md:block">
-          <ul className="list-none flex text-white space-x-10 text-lg ">
-            <li className="hover:text-primary">
-              <Link href="/">Home</Link>
+          <ul className="list-none flex text-white space-x-8 text-sm font-medium">
+            <li className="hover:text-primary transition-colors duration-200 relative group">
+              <Link href="/" className="py-2 block">
+                Home
+              </Link>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
             </li>
-            <li className="hover:text-primary">
-              <Link href="/movie">Movies</Link>
+            <li className="hover:text-primary transition-colors duration-200 relative group">
+              <Link href="/movie" className="py-2 block">
+                Movies
+              </Link>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
             </li>
-            <li className="hover:text-primary">
-              <Link href="/series">Series</Link>
+            <li className="hover:text-primary transition-colors duration-200 relative group">
+              <Link href="/series" className="py-2 block">
+                Series
+              </Link>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
             </li>
-            <li className="hover:text-primary">
-              <Link href="/watchlist">Watchlist</Link>
+            <li className="hover:text-primary transition-colors duration-200 relative group">
+              <Link href="/watchlist" className="py-2 block">
+                Watchlist
+              </Link>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
             </li>
           </ul>
         </div>
 
         <div className="flex items-center">
-          {/* searchbar */}
-          <div className="mr-5 md:mr-0 sm:mr-10 ">
+          {/* Search Icon */}
+          <div className="mr-4 md:mr-0">
             <Link href="/search">
-              <BiSearch className="text-xl text-white cursor-pointer hover:text-primary" />
+              <div className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 hover:scale-110">
+                <BiSearch className="text-lg text-white hover:text-primary transition-colors" />
+              </div>
             </Link>
           </div>
-          {/* hamburger button */}
-          <div className="-mr-2 flex md:hidden">
+
+          {/* Mobile Hamburger Button */}
+          <div className="md:hidden ml-2">
             <button
               onClick={toggleNavbar}
               type="button"
-              className="inline-flex items-center justify-center p-2 text-white hover:text-light-white focus:outline-none"
+              className="inline-flex items-center justify-center p-2 text-white hover:text-primary hover:bg-gray-800/50 rounded-lg transition-all duration-200 focus:outline-none"
               aria-expanded={isOpen}
+              aria-label="Toggle navigation menu"
             >
-              <span className="sr-only">Menu</span>
               {!isOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
+                <Menu className="h-5 w-5" />
               ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="h-5 w-5" />
               )}
             </button>
-          </div>{" "}
+          </div>
         </div>
       </div>
 
+      {/* Mobile Navigation Menu */}
       {isOpen && (
-        <div className="md:hidden ">
-          <div>
-            <ul className="list-none text-white space-y-4 mx-5 mb-3 text-base">
-              <li className="py-2 px-5 rounded hover:text-primary hover:bg-grey transition-all border-b border-grey">
-                <Link href="/">Home</Link>
-              </li>
-              <li className="py-2 px-5 rounded hover:text-primary hover:bg-grey transition-all border-b border-grey">
-                <Link href="/movie">Movies</Link>
-              </li>
-              <li className="py-2 px-5 rounded hover:text-primary hover:bg-grey transition-all border-b border-grey">
-                <Link href="/series">Series</Link>
-              </li>
-              <li className="py-2 px-5 rounded hover:text-primary hover:bg-grey transition-all">
-                <Link href="/watchlist">Watchlist</Link>
-              </li>
-            </ul>
+        <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50">
+          <div className="px-4 py-3 space-y-2">
+            <Link
+              href="/"
+              className="block py-3 px-4 text-sm font-medium text-white hover:text-primary hover:bg-gray-800/50 rounded-lg transition-all duration-200"
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/movie"
+              className="block py-3 px-4 text-sm font-medium text-white hover:text-primary hover:bg-gray-800/50 rounded-lg transition-all duration-200"
+              onClick={() => setIsOpen(false)}
+            >
+              Movies
+            </Link>
+            <Link
+              href="/series"
+              className="block py-3 px-4 text-sm font-medium text-white hover:text-primary hover:bg-gray-800/50 rounded-lg transition-all duration-200"
+              onClick={() => setIsOpen(false)}
+            >
+              Series
+            </Link>
+            <Link
+              href="/watchlist"
+              className="block py-3 px-4 text-sm font-medium text-white hover:text-primary hover:bg-gray-800/50 rounded-lg transition-all duration-200"
+              onClick={() => setIsOpen(false)}
+            >
+              Watchlist
+            </Link>
           </div>
         </div>
       )}

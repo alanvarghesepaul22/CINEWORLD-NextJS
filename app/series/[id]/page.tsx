@@ -8,7 +8,7 @@ async function getTVDetails(id: string) {
       throw new Error('Invalid TV series ID');
     }
     const data = await api.getDetails('tv', numericId);
-    const genreArr = data.genres?.map((genre: any) => genre.name) || [];
+    const genreArr = data.genres?.map((genre: { name: string }) => genre.name) || [];
     return { data, genreArr, id };
   } catch (error) {
     console.error('Failed to fetch TV details:', error);
@@ -24,7 +24,7 @@ interface TvDetailProps {
 
 const TvDetail: React.FC<TvDetailProps> = async ({ params }) => {
   const { id: idStr } = await params;
-  const { data, genreArr, id } = await getTVDetails(idStr);
+  const { data, genreArr } = await getTVDetails(idStr);
 
   if (!data) {
     return <div>TV show not found</div>;

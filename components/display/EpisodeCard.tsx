@@ -27,7 +27,7 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episodeinfo, seriesId }) => {
         >
           <Image
             src={still_path}
-            alt={episodeinfo.name}
+            alt={`${episodeinfo.name} episode still image`}
             className="rounded w-full h-full"
             width={288}
             height={176}

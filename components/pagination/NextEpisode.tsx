@@ -3,7 +3,7 @@ import React from "react";
 import { BiSkipPrevious, BiSkipNext } from "react-icons/bi";
 
 const NextEpisode = (props) => {
-  let { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
+  const { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
   return (
     <div className="flex w-full md:w-2/3 items-center justify-between px-10">
       <PrevEpisodeBtn episodeDetails={episodeDetails} seriesId={seriesId} />
@@ -20,7 +20,7 @@ const NextEpisode = (props) => {
 export default NextEpisode;
 
 function NextEpisodeBtn(props) {
-  let { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
+  const { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
   return (
     <>
       {Number(episodeDetails.episode_number) === totalEpisodes ? (
@@ -59,7 +59,7 @@ function NextEpisodeBtn(props) {
 }
 
 function PrevEpisodeBtn(props) {
-  let { episodeDetails, seriesId } = props;
+  const { episodeDetails, seriesId } = props;
   return (
     <>
       {Number(episodeDetails.episode_number) === 1 ? (

@@ -24,7 +24,7 @@ export default function Hero({ slides }: HeroProps) {
     if (slides && slides.length > 0) {
       setCurrentIndex(ci => ci >= slides.length ? 0 : ci);
     }
-  }, [slides?.length]);
+  }, [slides]);
 
   // Early return after all hooks are called
   if (!slides || slides.length === 0) {
@@ -73,7 +73,7 @@ export default function Hero({ slides }: HeroProps) {
         >
           <Image
             src={backdropUrl}
-            alt={title || 'Movie backdrop'}
+            alt={`${title || 'Featured content'} backdrop image`}
             fill
             className="object-cover"
             priority

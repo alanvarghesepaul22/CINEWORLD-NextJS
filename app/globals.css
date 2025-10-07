@@ -82,4 +82,30 @@
     transform: scale(1.1);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
+  
+  /* Section hover for chevron buttons only */
+  .section-hover:hover .chevron-btn-left,
+  .section-hover:hover .chevron-btn-right {
+    opacity: 1;
+  }
+  
+  /* Global app background gradient */
+  .app-bg {
+    @apply min-h-screen bg-app-gradient;
+  }
+  
+  /* Enhanced app background with better responsiveness */
+  .app-bg-enhanced {
+    @apply min-h-screen bg-gradient-to-br from-black via-gray-900 to-black;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
+  
+  /* Mobile optimized background */
+  @media (max-width: 768px) {
+    .app-bg-enhanced {
+      background-attachment: scroll;
+      background-size: cover;
+    }
+  }
 }

@@ -33,7 +33,7 @@ const HomeCards: React.FC<HomeCardsProps> = ({ MovieCard }) => {
         <div className="aspect-[2/3] w-full relative">
           <Image
             src={poster_path}
-            alt={titleVal}
+            alt={`${titleVal} ${isTV ? 'TV series' : 'movie'} poster`}
             width={200}
             height={300}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 ease-in-out"

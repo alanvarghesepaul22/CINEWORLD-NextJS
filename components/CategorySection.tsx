@@ -3,7 +3,8 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import { TMDBMovie, TMDBTVShow } from '@/lib/types';
 import { useCategoryData } from '@/lib/hooks';
-import HomeCards from './display/HomeCard';
+import MediaCard from './display/MediaCard';
+import SectionHeader from './layout/SectionHeader';
 import { Button } from './ui/button';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 
@@ -76,14 +77,14 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
 
   return (
     <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
+      <SectionHeader className="mb-6">
         <h2 className="text-2xl font-bold text-white">{title}</h2>
         <Link href={seeAllHref}>
           <Button variant="ghost" className="text-theme-primary hover:text-light-primary">
             See All <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
-      </div>
+      </SectionHeader>
       
       {showEmptyState ? (
         <div className="flex items-center justify-center h-32 text-gray-400">
@@ -97,12 +98,12 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
           )}
         </div>
       ) : (
-        <div className="relative group">
+        <div className="relative section-hover">
           {/* Left Arrow Button with gradient background - Hidden on mobile, visible on desktop */}
           <div className="absolute left-0 top-0 bottom-4 w-16 bg-gradient-to-r from-bg-black via-bg-black/80 to-transparent z-20 hidden md:block pointer-events-none"></div>
           <button
             onClick={scrollLeft}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-10 h-10 bg-theme-primary hover:bg-light-primary rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 nav-arrow"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full shadow-lg transition-all duration-300 opacity-0 hover:scale-110 chevron-btn-left border border-white/20"
             aria-label="Scroll left"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
@@ -112,7 +113,7 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
           <div className="absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-bg-black via-bg-black/80 to-transparent z-20 hidden md:block pointer-events-none"></div>
           <button
             onClick={scrollRight}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-10 h-10 bg-theme-primary hover:bg-light-primary rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 nav-arrow"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full shadow-lg transition-all duration-300 opacity-0 hover:scale-110 chevron-btn-right border border-white/20"
             aria-label="Scroll right"
           >
             <ChevronRight className="w-5 h-5 text-white" />
@@ -123,9 +124,9 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
             ref={scrollContainerRef}
             className="flex space-x-3 sm:space-x-4 overflow-x-auto pb-4 scrollbar-hide horizontal-scroll touch-scroll pl-4 sm:pl-0"
           >
-            {displayData.slice(0, 10).map((item, index) => (
+            {displayData.slice(0, 10).map((item) => (
               <div key={item.id} className="flex-shrink-0 scroll-snap-align-start">
-                <HomeCards MovieCard={item} />
+                <MediaCard media={item} variant="horizontal" />
               </div>
             ))}
             {/* Add some padding at the end for better mobile scrolling */}

@@ -4,7 +4,7 @@ import { AiFillGithub } from "react-icons/ai";
 
 const Footer: React.FC = () => {
   return (
-    <div className=" bg-grey px-5 py-0 flex items-center justify-between mt-10">
+    <div className=" bg-grey px-5 py-0 flex items-center justify-between">
       <Link href="/">
         <div className="">
           <p

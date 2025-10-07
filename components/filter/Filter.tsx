@@ -51,14 +51,14 @@ const Filter: React.FC<FilterProps> = ({
   const displayValue = value === "" ? "__reset__" : value;
 
   return (
-    <div className="m-3">
+    <div className="w-full">
       <label htmlFor={selectId} className="sr-only">
         {label}
       </label>
       <Select value={displayValue} onValueChange={handleValueChange}>
         <SelectTrigger
           id={selectId}
-          className="w-36 bg-transparent text-primary border-2 border-primary rounded-full"
+          className="w-full bg-transparent text-primary border-2 border-primary rounded-full text-sm"
         >
           <SelectValue placeholder={label} />
         </SelectTrigger>

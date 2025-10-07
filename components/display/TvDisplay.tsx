@@ -1,32 +1,36 @@
 import React from "react";
-import TvCards from "./TvCards";
-import GenericPagination from "../pagination/GenericPagination";
+import MediaCard from "./MediaCard";
+import ResponsiveGrid from "../layout/ResponsiveGrid";
+import PaginationWrapper from "../layout/PaginationWrapper";
 import { TMDBTVShow } from "@/lib/types";
 
 interface TvDisplayProps {
   series?: TMDBTVShow[];
   pageid?: string | number;
-  category?: string; // e.g., "popular", "top-rated", "trending", "on-the-air"
+  totalPages?: number;
 }
 
-const TvDisplay: React.FC<TvDisplayProps> = ({ series, pageid, category = "trending" }) => {
-  // Construct the base URL for pagination
-  const baseUrl = `/series/${category}`;
+const TvDisplay: React.FC<TvDisplayProps> = ({ series, pageid, totalPages = 500 }) => {
+  // Use base URL with query params for pagination
+  const baseUrl = `/series`;
   
   return (
     <>
-      <div className="flex flex-wrap justify-center py-10 px-5">
-        {
-          (series ?? []).map((serie) => <TvCards key={serie.id} seriesData={serie} />)
-        }
-      </div>
-      {pageid != null && (
-        <GenericPagination 
-          currentPage={pageid} 
-          baseUrl={baseUrl}
-          maxPage={500} // TMDB API limit
-        />
-      )}
+      <ResponsiveGrid>
+        {(series ?? []).map((serie) => (
+          <MediaCard 
+            key={serie.id} 
+            media={serie} 
+            variant="grid"
+          />
+        ))}
+      </ResponsiveGrid>
+      
+      <PaginationWrapper 
+        pageid={pageid}
+        baseUrl={baseUrl}
+        maxPage={totalPages}
+      />
     </>
   );
 };

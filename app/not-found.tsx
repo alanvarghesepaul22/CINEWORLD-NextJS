@@ -7,7 +7,7 @@ const PageNotFound = () => {
       <div className="max-w-lg px-8 py-12">
         <h1 className="text-5xl font-bold text-white mb-4">404</h1>
         <p className="text-gray-300 text-xl mb-6">
-          Oops! The page you're looking for does not exist.
+          Oops! The page you&apos;re looking for does not exist.
         </p>
         <Link
           href="/"

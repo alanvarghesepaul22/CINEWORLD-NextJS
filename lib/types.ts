@@ -41,6 +41,20 @@ export interface TMDBTrendingResponse {
   total_results: number
 }
 
+export interface TMDBMovieResponse {
+  page: number
+  results: TMDBMovie[]
+  total_pages: number
+  total_results: number
+}
+
+export interface TMDBTVResponse {
+  page: number
+  results: TMDBTVShow[]
+  total_pages: number
+  total_results: number
+}
+
 /**
  * Genre interface for TMDB API responses.
  * Represents genres returned directly from TMDB with a required numeric ID.

@@ -23,7 +23,7 @@ interface EpisodeDetailsProps {
 }
 
 const EpisodeDetails: React.FC<EpisodeDetailsProps> = (props) => {
-  let { episodeDetails } = props;
+  const { episodeDetails } = props;
   let formattedDate = "";
   if (episodeDetails.air_date && episodeDetails.air_date !== "") {
     formattedDate = formatDate(episodeDetails.air_date);

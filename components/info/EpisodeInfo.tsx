@@ -18,9 +18,9 @@ interface EpisodeInfoProps {
 }
 
 const EpisodeInfo = (props: EpisodeInfoProps) => {
-  let { episodeDetails, seriesId, seasonData, seriesData } = props;
-  let TotalEpisodes = seasonData?.episodes?.length ?? 0;
-  let TotalSeasons = seriesData?.number_of_seasons ?? 0;
+  const { episodeDetails, seriesId, seasonData, seriesData } = props;
+  const TotalEpisodes = seasonData?.episodes?.length ?? 0;
+  const TotalSeasons = seriesData?.number_of_seasons ?? 0;
 
   // Find the full episode details from seasonData.episodes
   const fullEpisodeDetails =

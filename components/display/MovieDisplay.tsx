@@ -1,33 +1,37 @@
 "use client"
 import React from "react";
-import MovieCards from "./MovieCards";
-import GenericPagination from "../pagination/GenericPagination";
+import MediaCard from "./MediaCard";
+import ResponsiveGrid from "../layout/ResponsiveGrid";
+import PaginationWrapper from "../layout/PaginationWrapper";
 import { TMDBMovie } from "@/lib/types";
 
 interface MovieDisplayProps {
   movies?: TMDBMovie[];
   pageid?: string;
-  category?: string; // e.g., "popular", "top-rated", "now-playing"
+  totalPages?: number;
 }
 
-const MovieDisplay: React.FC<MovieDisplayProps> = ({ movies, pageid, category = "popular" }) => {
-  // Construct the base URL for pagination
-  const baseUrl = `/movie/${category}`;
+const MovieDisplay: React.FC<MovieDisplayProps> = ({ movies, pageid, totalPages = 500 }) => {
+  // Use base URL with query params for pagination
+  const baseUrl = `/movie`;
   
   return (
     <>
-      <div className="flex flex-wrap justify-center py-10 px-5">
-        {movies?.map((movie) => {
-          return <MovieCards key={movie.id} MovieCard={movie} />;
-        })}
-      </div>
-      {pageid && (
-        <GenericPagination 
-          currentPage={pageid} 
-          baseUrl={baseUrl}
-          maxPage={500} // TMDB API limit
-        />
-      )}
+      <ResponsiveGrid>
+        {movies?.map((movie) => (
+          <MediaCard 
+            key={movie.id} 
+            media={movie} 
+            variant="grid"
+          />
+        ))}
+      </ResponsiveGrid>
+      
+      <PaginationWrapper 
+        pageid={pageid}
+        baseUrl={baseUrl}
+        maxPage={totalPages}
+      />
     </>
   );
 };

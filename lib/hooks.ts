@@ -2,9 +2,6 @@ import useSWR from 'swr';
 import { api } from './api';
 import { TMDBTrendingResponse, TMDBGenresResponse, TMDBSearchResponse } from './types';
 
-// SWR fetcher
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 // Custom hooks for TMDB API
 export function useTrending(mediaType: 'all' | 'movie' | 'tv' = 'all', timeWindow: 'day' | 'week' = 'day', page = 1) {
   return useSWR<TMDBTrendingResponse>(
