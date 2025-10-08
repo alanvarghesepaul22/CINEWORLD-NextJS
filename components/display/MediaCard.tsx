@@ -68,7 +68,7 @@ const MediaCard: React.FC<MediaCardProps> = ({
               addToWatchlist(media);
             }
           }}
-          className={`p-2 h-9 w-9 rounded-xl transition-all duration-200 ${
+          className={`p-2 h-9 w-9 rounded-xl smooth-transition ${
             inWatchlist
               ? "text-theme-primary bg-theme-primary/10 hover:bg-theme-primary/20 border border-theme-primary/30 backdrop-blur-md"
               : "text-white hover:bg-white/20 backdrop-blur-md border border-white/30"

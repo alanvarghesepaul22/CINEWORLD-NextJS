@@ -185,7 +185,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
   ];
 
   return (
-    <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700 p-4 sm:p-6 mx-4 my-6">
+    <div className="glass-container mx-4 my-6 border-gray-700">
       {/* Filter Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-white">Discover Content</h2>
@@ -262,7 +262,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
             onClick={applyFilters}
             disabled={isApplying || !hasActiveFilters}
             size="sm"
-            className="bg-primary hover:bg-light-primary disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-semibold transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 disabled:opacity-50"
+            className="bg-primary hover:bg-light-primary disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-semibold smooth-transition transform hover:scale-105 disabled:hover:scale-100 disabled:opacity-50"
           >
             {isApplying ? (
               <span className="flex items-center gap-2">
@@ -366,7 +366,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
             <Button
               onClick={applyFilters}
               disabled={isApplying || !hasActiveFilters}
-              className="px-6 py-2.5 bg-primary hover:bg-light-primary disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-semibold transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 whitespace-nowrap"
+              className="px-6 py-2.5 bg-primary hover:bg-light-primary disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-semibold smooth-transition transform hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 whitespace-nowrap"
             >
               {isApplying ? (
                 <span className="flex items-center gap-2">

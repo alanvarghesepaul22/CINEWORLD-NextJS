@@ -1,72 +1,84 @@
 "use client";
 import React from "react";
-import ImageCard from "../display/ImageCard";
-import MovieDetails from "./MovieDetails";
+import MediaDetailLayout from "../layout/MediaDetailLayout";
+import MediaPoster from "../display/MediaPoster";
+import MediaMeta from "./MediaMeta";
+import MediaPlayer from "../display/MediaPlayer";
+import DidYouKnowSection from "./DidYouKnowSection";
 import { useResume } from "@/lib/useResume";
-import { Button } from "@/components/ui/button";
+import { TMDBMovieDetail } from "@/lib/types";
 
 interface MovieInfoProps {
-  MovieDetail: {
-    id: string | number;
-    poster_path: string | null;
-    title?: string;
-    name?: string;
-    // Add other MovieDetail properties used in ImageCard and MovieDetails
-  };
-  genreArr: string[] | number[];
+  MovieDetail: TMDBMovieDetail;
+  genreArr: string[];
   id: string | number;
 }
 
-const MovieInfo = (props: MovieInfoProps) => {
-  const { MovieDetail, genreArr, id } = props;
-  // …
+const MovieInfo: React.FC<MovieInfoProps> = ({ MovieDetail, genreArr, id }) => {
   const { getProgress, markAsWatched, startOver, isWatched } = useResume();
-  const progress = getProgress(Number(MovieDetail.id), 'movie');
-  const watched = isWatched(Number(MovieDetail.id), 'movie');
+  const progress = getProgress(Number(MovieDetail.id), "movie");
+  const watched = isWatched(Number(MovieDetail.id), "movie");
+
+  const title =
+    MovieDetail.title || MovieDetail.original_title || "Unknown Title";
+  const releaseYear = MovieDetail.release_date
+    ? MovieDetail.release_date.slice(0, 4)
+    : undefined;
 
   return (
-    <div>
-      <div className="flex flex-row flex-wrap place-content-center items-center mb-10 mt-5">
-        <ImageCard mediaDetail={MovieDetail} />
-        <MovieDetails MovieDetail={{ ...MovieDetail, id: Number(MovieDetail.id) }} genreArr={genreArr.map(String)} />
-      </div>
-      <div className="pt-2 pb-8 flex justify-center">
-        <iframe
-          className="w-4/5 aspect-video border-0"
-          src={"https://v2.vidsrc.me/embed/" + id}
-          title="Movie video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen={true}
-        ></iframe>
-        {/* working */}
-        {/* https://v2.vidsrc.me/embed/ */}
-        {/* https://vidsrc.to/embed/movie/ */}
+    <MediaDetailLayout className="pt-16">
+      <div className="space-y-8 lg:space-y-12">
+        {/* Hero Section - Poster and Metadata */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Poster */}
+          <div className="lg:col-span-1">
+            <MediaPoster
+              posterPath={MovieDetail.poster_path}
+              title={title}
+              className="mx-auto lg:mx-0"
+            />
+          </div>
 
-        {/* not working */}
-        {/* https://olgply.xyz/ */}
-        {/* src={"https://autoembed.to/movie/tmdb/" + id} */}
+          {/* Metadata */}
+          <div className="lg:col-span-3">
+            <MediaMeta
+              type="movie"
+              title={title}
+              year={releaseYear}
+              rating={MovieDetail.vote_average}
+              ratingCount={MovieDetail.vote_count}
+              runtime={MovieDetail.runtime}
+              genres={genreArr}
+              overview={MovieDetail.overview}
+              watchControls={{
+                isWatched: watched,
+                hasProgress: progress > 0,
+                onMarkWatched: () =>
+                  markAsWatched(Number(MovieDetail.id), "movie"),
+                onStartOver: () => startOver(Number(MovieDetail.id), "movie"),
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Video Player Section */}
+        <MediaPlayer mediaId={id} title={title} type="movie" />
+
+        {/* Controls and Additional Info Grid */}
+        <div className="max-w-6xl mx-auto">
+          {/* Did You Know Section - Full Width */}
+          <DidYouKnowSection
+            title={title}
+            movieData={{
+              title: title,
+              release_date: MovieDetail.release_date,
+              overview: MovieDetail.overview,
+              vote_average: MovieDetail.vote_average
+            }}
+          />
+        </div>
       </div>
-      <div className="flex justify-center gap-4 mb-8">
-        {watched ? (
-          <Button onClick={() => startOver(Number(MovieDetail.id), 'movie')}>
-            Start Over
-          </Button>
-        ) : progress > 0 ? (
-          <>
-            <Button onClick={() => markAsWatched(Number(MovieDetail.id), 'movie')}>
-              Mark as Watched
-            </Button>
-            <Button variant="outline" onClick={() => startOver(Number(MovieDetail.id), 'movie')}>
-              Start Over
-            </Button>
-          </>
-        ) : (
-          <Button onClick={() => markAsWatched(Number(MovieDetail.id), 'movie')}>
-            Mark as Watched
-          </Button>
-        )}
-      </div>
-    </div>
+    </MediaDetailLayout>
   );
 };
 

@@ -2,14 +2,21 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { BiSearch } from "react-icons/bi";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import Logo from "./Logo";
+import AISuggestionModal from "@/components/suggestions/AISuggestionModal";
 
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isSuggestionModalOpen, setIsSuggestionModalOpen] =
+    useState<boolean>(false);
 
   const toggleNavbar = (): void => {
     setIsOpen(!isOpen);
+  };
+
+  const openSuggestionModal = (): void => {
+    setIsSuggestionModalOpen(true);
   };
 
   return (
@@ -48,9 +55,18 @@ const Header: React.FC = () => {
           </ul>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {/* AI Suggestion Button */}
+          <button
+            onClick={openSuggestionModal}
+            className="p-1 rounded-lg bg-gradient-to-r from-theme-primary/20 to-theme-primary/10 hover:from-theme-primary/30 hover:to-theme-primary/20 border border-theme-primary/50 transition-all duration-200 hover:scale-110 group"
+            title="Get AI movie/series suggestion"
+          >
+            <Sparkles className="text-lg text-theme-primary group-hover:animate-pulse transition-colors" />
+          </button>
+
           {/* Search Icon */}
-          <div className="mr-4 md:mr-0">
+          <div>
             <Link href="/search">
               <div className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 hover:scale-110">
                 <BiSearch className="text-lg text-white hover:text-primary transition-colors" />
@@ -112,6 +128,12 @@ const Header: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* AI Suggestion Modal */}
+      <AISuggestionModal
+        isOpen={isSuggestionModalOpen}
+        onClose={() => setIsSuggestionModalOpen(false)}
+      />
     </nav>
   );
 };

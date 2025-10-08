@@ -47,7 +47,8 @@ async function fetchWithRetry(
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for more stable connection
     
     try {
-      const response = await fetch(url, {
+      // Add Next.js revalidation for server-side calls
+      const fetchOptions: RequestInit = {
         ...options,
         signal: controller.signal,
         headers: {
@@ -57,7 +58,14 @@ async function fetchWithRetry(
           'Accept': 'application/json',
           'Connection': 'keep-alive',
         },
-      });
+      };
+
+      // Add revalidation for server-side calls (Next.js SSR/SSG)
+      if (typeof window === 'undefined') {
+        fetchOptions.next = { revalidate: 3600 }; // 1 hour revalidation for server-side calls
+      }
+      
+      const response = await fetch(url, fetchOptions);
       
       clearTimeout(timeoutId);
       
@@ -123,6 +131,12 @@ async function getDetails(
   id: number
 ): Promise<TMDBMovieDetail | TMDBTVDetail> {
   checkAccessToken();
+  
+  // Validate that the ID is a positive integer
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error(`Invalid ${mediaType} ID: ${id}. ID must be a positive integer.`);
+  }
+  
   const response = await fetchWithRetry(`${BASE_URL}/${mediaType}/${id}`, {
     headers: getHeaders(),
   });

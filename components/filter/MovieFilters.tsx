@@ -77,12 +77,12 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
 
   return (
     <div className="container mx-auto px-4 mb-8">
-      <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700 p-4 sm:p-6">
+      <div className="glass-container">
         {/* Mobile Layout */}
         <div className="block md:hidden">
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <Label className="text-xs font-medium text-gray-300 mb-1">Category</Label>
+              <Label className="filter-label-xs mb-1">Category</Label>
               <Filter
                 label="Category"
                 options={categoryOptions}
@@ -92,7 +92,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-gray-300 mb-1">Genre</Label>
+              <Label className="filter-label-xs mb-1">Genre</Label>
               <Filter
                 label="Genre"
                 options={genreOptions}
@@ -103,7 +103,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-gray-300 mb-1">Year</Label>
+              <Label className="filter-label-xs mb-1">Year</Label>
               <Filter
                 label="Year"
                 options={yearOptions}
@@ -114,7 +114,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-gray-300 mb-1">Sort</Label>
+              <Label className="filter-label-xs mb-1">Sort</Label>
               <Filter
                 label="Sort"
                 options={sortOptions}
@@ -129,7 +129,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-300 whitespace-nowrap">Category:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">Category:</Label>
             <Filter
               label="Category"
               options={categoryOptions}
@@ -139,7 +139,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
             />
           </div>
           <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-300 whitespace-nowrap">Genre:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">Genre:</Label>
             <Filter
               label="Genre"
               options={genreOptions}
@@ -150,7 +150,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
             />
           </div>
           <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-300 whitespace-nowrap">Year:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">Year:</Label>
             <Filter
               label="Year"
               options={yearOptions}
@@ -161,7 +161,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
             />
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <Label className="text-sm font-medium text-gray-300 whitespace-nowrap">Sort by:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">Sort by:</Label>
             <Filter
               label="Sort"
               options={sortOptions}

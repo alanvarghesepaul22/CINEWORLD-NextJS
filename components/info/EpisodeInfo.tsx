@@ -1,6 +1,9 @@
 import React from "react";
-import EpisodeDetails from "./EpisodeDetails";
-import NextEpisode from "../pagination/NextEpisode";
+import MediaDetailLayout from "../layout/MediaDetailLayout";
+import EpisodeMeta from "./EpisodeMeta";
+import MediaPlayer from "./MediaPlayer";
+import EpisodeNavigation from "../pagination/EpisodeNavigation";
+import DidYouKnowSection from "./DidYouKnowSection";
 import { EpisodeSummary } from "@/lib/types";
 
 interface EpisodeInfoProps {
@@ -14,6 +17,7 @@ interface EpisodeInfoProps {
   };
   seriesData: {
     number_of_seasons: number;
+    name?: string;
   };
 }
 
@@ -37,35 +41,48 @@ const EpisodeInfo = (props: EpisodeInfoProps) => {
     };
 
   return (
-    <div>
-      <div className="flex flex-row place-content-center items-center mb-10 mt-5">
-        <EpisodeDetails episodeDetails={fullEpisodeDetails} />
-      </div>
-      <div className="pt-2 pb-8 flex justify-center">
-        <iframe
-          className="w-4/5 aspect-video sm:px-4"
-          src={`https://v2.vidsrc.me/embed/${seriesId}/${episodeDetails.season_number}-${episodeDetails.episode_number}`}
-          allowFullScreen={true}
-          sandbox="allow-scripts allow-same-origin"
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          title="Episode Video Player"
-        ></iframe>{" "}
-        {/* https://vidsrc.to/embed/tv/${seriesId}/${episodeDetails.season_number}/${episodeDetails.episode_number} */}
-        {/* https://v2.vidsrc.me/embed/${seriesId}/${episodeDetails.season_number}-${episodeDetails.episode_number} */}
-        {/* not working */}
-        {/* https://olgply.xyz/${seriesId}/${episodeDetails.season_number}/${episodeDetails.episode_number} */}
-        {/* src={`https://autoembed.to/tv/tmdb/${seriesId}-${episodeDetails.season_number}-${episodeDetails.episode_number}`} */}
-      </div>
-      <div className="flex w-full items-center justify-center">
-        <NextEpisode
+    <MediaDetailLayout className="mt-20">
+      <div className="space-y-8">
+        {/* Episode Information */}
+        <EpisodeMeta
+          seasonNumber={episodeDetails.season_number}
+          episodeNumber={episodeDetails.episode_number}
+          episodeTitle={fullEpisodeDetails.name}
+          airDate={fullEpisodeDetails.air_date}
+          runtime={fullEpisodeDetails.runtime}
+          overview={fullEpisodeDetails.overview}
+          seriesTitle={seriesData?.name}
+        />
+
+        {/* Video Player */}
+        <MediaPlayer
           seriesId={seriesId}
-          episodeDetails={episodeDetails}
+          seasonNumber={episodeDetails.season_number}
+          episodeNumber={episodeDetails.episode_number}
+          episodeTitle={fullEpisodeDetails.name}
+        />
+
+        {/* Episode Navigation */}
+        <EpisodeNavigation
+          seriesId={seriesId}
+          currentSeason={episodeDetails.season_number}
+          currentEpisode={episodeDetails.episode_number}
           totalEpisodes={TotalEpisodes}
           totalSeasons={TotalSeasons}
         />
+
+        {/* Did You Know Section */}
+        <DidYouKnowSection
+          title={`${seriesData?.name || 'Series'} - S${episodeDetails.season_number}E${episodeDetails.episode_number}`}
+          movieData={{
+            name: `${seriesData?.name || 'Series'} - S${episodeDetails.season_number}E${episodeDetails.episode_number}`,
+            overview: fullEpisodeDetails?.overview || '',
+            first_air_date: fullEpisodeDetails?.air_date || ''
+          }}
+          className="max-w-6xl mx-auto"
+        />
       </div>
-    </div>
+    </MediaDetailLayout>
   );
 };
 

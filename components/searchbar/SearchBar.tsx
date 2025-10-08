@@ -11,12 +11,21 @@ interface SearchBarProps {
    * with current value to ensure search happens regardless of debouncing strategy.
    */
   onSearch?: (value: string) => void;
+  /**
+   * Initial value for the search input
+   */
+  initialValue?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue = "" }) => {
   const searchBarRef = useRef<HTMLInputElement>(null);
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>(initialValue);
   const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  // Update search value when initialValue changes
+  useEffect(() => {
+    setSearchValue(initialValue);
+  }, [initialValue]);
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);

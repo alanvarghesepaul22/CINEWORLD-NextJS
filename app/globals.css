@@ -24,6 +24,11 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
@@ -46,6 +51,19 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
@@ -108,4 +126,41 @@
       background-size: cover;
     }
   }
+  
+  /* Reusable component classes */
+  .glass-container {
+    @apply bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 p-4 sm:p-6;
+  }
+  
+  .filter-label-xs {
+    @apply text-xs font-medium text-gray-300 mb-1;
+  }
+  
+  .filter-label-sm {
+    @apply text-sm font-medium text-gray-300 whitespace-nowrap;
+  }
+  
+  .footer-link {
+    @apply text-gray-300 hover:text-primary text-sm transition-all duration-200 hover:scale-105 relative;
+  }
+  
+  .smooth-transition {
+    @apply transition-all duration-200;
+  }
 }
+
+/* High-contrast system mode support for focus indicators */
+  @media (prefers-contrast: high) {
+    .hero-carousel-focus:focus-visible {
+      outline: 3px solid currentColor !important;
+      outline-offset: 3px !important;
+    }
+  }
+  
+  /* Forced colors mode (Windows High Contrast) support */
+  @media (forced-colors: active) {
+    .hero-carousel-focus:focus-visible {
+      outline: 2px solid ButtonText !important;
+      outline-offset: 2px !important;
+    }
+  }
