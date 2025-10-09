@@ -1,21 +1,32 @@
 "use client";
-import React, { useRef } from 'react';
-import Link from 'next/link';
-import { TMDBMovie, TMDBTVShow } from '@/lib/types';
-import { useCategoryData } from '@/lib/hooks';
-import MediaCard from './display/MediaCard';
-import SectionHeader from './layout/SectionHeader';
-import { Button } from './ui/button';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import React, { useRef } from "react";
+import Link from "next/link";
+import { TMDBMovie, TMDBTVShow } from "@/lib/types";
+import { useCategoryData } from "@/lib/hooks";
+import MediaCard from "../display/MediaCard";
+import SectionHeader from "../layout/SectionHeader";
+import { Button } from "../ui/button";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 interface CategorySectionProps {
   title: string;
-  mediaType: 'movie' | 'tv';
-  category: 'popular' | 'top_rated' | 'now_playing' | 'upcoming' | 'on_the_air' | 'airing_today';
+  mediaType: "movie" | "tv";
+  category:
+    | "popular"
+    | "top_rated"
+    | "now_playing"
+    | "upcoming"
+    | "on_the_air"
+    | "airing_today";
   seeAllHref: string;
 }
 
-export default function CategorySection({ title, mediaType, category, seeAllHref }: CategorySectionProps) {
+export default function CategorySection({
+  title,
+  mediaType,
+  category,
+  seeAllHref,
+}: CategorySectionProps) {
   const page = 1;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -27,11 +38,12 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const cardWidth = window.innerWidth >= 768 ? 200 : window.innerWidth >= 640 ? 180 : 160;
+      const cardWidth =
+        window.innerWidth >= 768 ? 200 : window.innerWidth >= 640 ? 180 : 160;
       const scrollAmount = cardWidth * 2 + 16; // Card width * 2 + gap
-      container.scrollBy({ 
-        left: -scrollAmount, 
-        behavior: 'smooth' 
+      container.scrollBy({
+        left: -scrollAmount,
+        behavior: "smooth",
       });
     }
   };
@@ -39,11 +51,12 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
   const scrollRight = () => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const cardWidth = window.innerWidth >= 768 ? 200 : window.innerWidth >= 640 ? 180 : 160;
+      const cardWidth =
+        window.innerWidth >= 768 ? 200 : window.innerWidth >= 640 ? 180 : 160;
       const scrollAmount = cardWidth * 2 + 16; // Card width * 2 + gap
-      container.scrollBy({ 
-        left: scrollAmount, 
-        behavior: 'smooth' 
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
       });
     }
   };
@@ -65,11 +78,14 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
   }
 
   const showEmptyState = hasError || results.length === 0;
-  
+
   let displayData: (TMDBMovie | TMDBTVShow)[];
-  
+
   if (hasError) {
-    console.warn(`CategorySection API error for ${mediaType}/${category}:`, error);
+    console.warn(
+      `CategorySection API error for ${mediaType}/${category}:`,
+      error
+    );
     displayData = [];
   } else {
     displayData = results;
@@ -80,21 +96,31 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
       <SectionHeader className="mb-6">
         <h2 className="text-2xl font-bold text-white">{title}</h2>
         <Link href={seeAllHref}>
-          <Button variant="ghost" className="text-theme-primary hover:text-light-primary">
+          <Button
+            variant="ghost"
+            className="text-theme-primary hover:text-theme-primary hover:bg-gray-700/20 transition-colors"
+          >
             See All <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
       </SectionHeader>
-      
+
       {showEmptyState ? (
         <div className="flex items-center justify-center h-32 text-gray-400">
           {hasError ? (
             <div className="text-center">
-              <p className="text-lg mb-2">Failed to load {mediaType === 'movie' ? 'movies' : 'TV shows'}</p>
-              <p className="text-sm">Please check your internet connection and try again</p>
+              <p className="text-lg mb-2">
+                Failed to load {mediaType === "movie" ? "movies" : "TV shows"}
+              </p>
+              <p className="text-sm">
+                Please check your internet connection and try again
+              </p>
             </div>
           ) : (
-            <p className="text-lg">No {mediaType === 'movie' ? 'movies' : 'TV shows'} available at the moment.</p>
+            <p className="text-lg">
+              No {mediaType === "movie" ? "movies" : "TV shows"} available at
+              the moment.
+            </p>
           )}
         </div>
       ) : (
@@ -120,12 +146,15 @@ export default function CategorySection({ title, mediaType, category, seeAllHref
           </button>
 
           {/* Scroll Container */}
-          <div 
+          <div
             ref={scrollContainerRef}
             className="flex space-x-3 sm:space-x-4 overflow-x-auto pb-4 scrollbar-hide horizontal-scroll touch-scroll pl-4 sm:pl-0"
           >
             {displayData.slice(0, 10).map((item) => (
-              <div key={item.id} className="flex-shrink-0 scroll-snap-align-start">
+              <div
+                key={item.id}
+                className="flex-shrink-0 scroll-snap-align-start"
+              >
                 <MediaCard media={item} variant="horizontal" />
               </div>
             ))}

@@ -34,6 +34,26 @@ interface AISuggestion {
   searchKeyword: string;
 }
 
+// Type guard function
+function isValidSuggestion(data: unknown): data is AISuggestion {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'title' in data &&
+    'year' in data &&
+    'type' in data &&
+    'overview' in data &&
+    'reason' in data &&
+    'searchKeyword' in data &&
+    typeof (data as AISuggestion).title === 'string' &&
+    typeof (data as AISuggestion).year === 'string' &&
+    (((data as AISuggestion).type === 'movie') || ((data as AISuggestion).type === 'series')) &&
+    typeof (data as AISuggestion).overview === 'string' &&
+    typeof (data as AISuggestion).reason === 'string' &&
+    typeof (data as AISuggestion).searchKeyword === 'string'
+  );
+}
+
 // API Response type definition
 interface AIResponse {
   success?: boolean;
@@ -121,12 +141,13 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
         }
 
         if (data?.success && data?.suggestion) {
-          // Parse the suggestion string as JSON to get the AISuggestion object
-          try {
-            const parsedSuggestion = JSON.parse(data.suggestion) as AISuggestion;
-            setSuggestion(parsedSuggestion);
+          // Validate the suggestion object structure
+          const suggestionData = data.suggestion;
+          
+          if (isValidSuggestion(suggestionData)) {
+            setSuggestion(suggestionData);
             setHasGenerated(true);
-          } catch {
+          } else {
             throw new Error("Invalid suggestion format received from AI");
           }
         } else {

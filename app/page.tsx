@@ -1,67 +1,17 @@
-import Hero from "@/components/Hero";
-import CategorySection from "@/components/CategorySection";
-import { TMDBMovie, TMDBTVShow } from "@/lib/types";
-import { api } from "@/lib/api";
+import { Metadata } from "next";
+import Hero from "@/components/hero/Hero";
+import CategorySection from "@/components/info/CategorySection";
 
-async function getHeroSlides(): Promise<(TMDBMovie | TMDBTVShow)[]> {
-  try {
-    // Try to fetch both movie and TV data with individual error handling
-    const [movieResult, tvResult] = await Promise.allSettled([
-      api.getPopular('movie', 1),
-      api.getPopular('tv', 1)
-    ]);
+export const metadata: Metadata = {
+  title: "Home | Cineworld",
+  description:
+    "Browse all movies and tv shows currently available on Cineworld. Find trending, top-rated, and new releases.",
+};
 
-    const movieData = movieResult.status === 'fulfilled' ? movieResult.value.results.slice(0, 4) : [];
-    const tvData = tvResult.status === 'fulfilled' ? tvResult.value.results.slice(0, 3) : [];
-
-    // Log any failures for debugging
-    if (movieResult.status === 'rejected') {
-      console.warn('Failed to fetch popular movies for hero:', movieResult.reason);
-    }
-    if (tvResult.status === 'rejected') {
-      console.warn('Failed to fetch popular TV shows for hero:', tvResult.reason);
-    }
-
-    // Combine available data
-    const combined = [...movieData, ...tvData];
-    
-    // If we have no data at all, return some fallback data or empty array
-    if (combined.length === 0) {
-      console.warn('No hero slides data available, using empty array');
-      return [];
-    }
-    
-    // Validate and normalize dates to timestamps
-    const getValidTimestamp = (dateStr: string | null | undefined): number => {
-      if (!dateStr || dateStr.trim() === '') {
-        return Number.NEGATIVE_INFINITY; // Sort invalid dates to end
-      }
-      const timestamp = Date.parse(dateStr);
-      return isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
-    };
-    
-    return combined.sort((a, b) => {
-      // Extract candidate date strings
-      const dateStringA = 'release_date' in a ? a.release_date : a.first_air_date;
-      const dateStringB = 'release_date' in b ? b.release_date : b.first_air_date;
-      
-      const timestampA = getValidTimestamp(dateStringA);
-      const timestampB = getValidTimestamp(dateStringB);
-      
-      return timestampB - timestampA; // Latest first
-    });
-  } catch (error) {
-    console.error('Critical error in getHeroSlides:', error);
-    return [];
-  }
-}
-
-export default async function Home() {
-  const heroSlides = await getHeroSlides();
-
+export default async function HomePage() {
   return (
     <div className="app-bg-enhanced mt-16">
-      <Hero slides={heroSlides} />
+      <Hero />
       <div className="relative z-10 pt-8">
         <div className="container mx-auto px-4">
           <div className="space-y-12">

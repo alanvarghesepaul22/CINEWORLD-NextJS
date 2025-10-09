@@ -157,6 +157,40 @@ export interface EpisodeSummary {
   still_path: string | null
 }
 
+/**
+ * Detailed episode interface for TMDB episode detail responses.
+ * Extends EpisodeSummary with additional required fields.
+ */
+export interface TMDBEpisodeDetail {
+  id: number
+  name: string
+  overview: string
+  vote_average: number
+  vote_count: number
+  air_date: string
+  episode_number: number
+  production_code: string
+  runtime: number
+  season_number: number
+  show_id: number
+  still_path: string
+}
+
+/**
+ * Detailed season interface for TMDB season detail responses.
+ * Includes full episode list and additional metadata.
+ */
+export interface TMDBSeasonDetail {
+  id: number
+  air_date: string
+  episodes: TMDBEpisodeDetail[]
+  name: string
+  overview: string
+  poster_path: string
+  season_number: number
+  vote_average: number
+}
+
 export interface TMDBTVDetail extends Omit<TMDBTVShow, 'genre_ids'> {
   created_by: TMDBCreatedBy[]
   episode_run_time: number[]

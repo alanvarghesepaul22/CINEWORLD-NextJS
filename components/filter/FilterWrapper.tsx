@@ -44,18 +44,8 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const [movieGenres, tvGenres] = await Promise.all([
-          api.getGenres('movie'),
-          api.getGenres('tv')
-        ]);
-        
-        // Combine and deduplicate genres
-        const allGenres = [...movieGenres.genres, ...tvGenres.genres];
-        const uniqueGenres = allGenres.filter((genre, index, self) =>
-          index === self.findIndex(g => g.id === genre.id)
-        );
-        
-        setGenres(uniqueGenres);
+        const genresResponse = await api.getGenres();
+        setGenres(genresResponse.genres);
       } catch (error) {
         console.error('Failed to fetch genres:', error);
         onErrorChange('Failed to load filter options');
@@ -196,8 +186,8 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
       <div className="block md:hidden">
         <div className="grid grid-cols-2 gap-3 mb-4">
           {/* Genre Filter */}
-          <div>
-            <Label className="text-xs font-medium text-gray-300 mb-1">
+          <>
+            <Label className="filter-label-xs">
               Genre
             </Label>
             <Filter
@@ -208,11 +198,11 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
               includeReset={true}
               resetLabel="Any"
             />
-          </div>
+          </>
 
           {/* Media Type Filter */}
-          <div>
-            <Label className="text-xs font-medium text-gray-300 mb-1">
+          <>
+            <Label className="filter-label-xs">
               Type
             </Label>
             <Filter
@@ -223,11 +213,11 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
               includeReset={true}
               resetLabel="All"
             />
-          </div>
+          </>
 
           {/* Year Filter */}
-          <div>
-            <Label className="text-xs font-medium text-gray-300 mb-1">
+          <>
+            <Label className="filter-label-xs">
               Year
             </Label>
             <Filter
@@ -238,11 +228,11 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
               includeReset={true}
               resetLabel="Any"
             />
-          </div>
+          </>
 
           {/* Rating Filter */}
-          <div>
-            <Label className="text-xs font-medium text-gray-300 mb-1">
+          <>
+            <Label className="filter-label-xs">
               Rating
             </Label>
             <Filter
@@ -253,7 +243,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
               includeReset={true}
               resetLabel="Any"
             />
-          </div>
+          </>
         </div>
 
         {/* Mobile Action Buttons - Centered */}
@@ -303,7 +293,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
         <div className="flex items-end gap-3 mb-4">
           {/* Genre Filter */}
           <div className="flex-1">
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
+            <Label className="block filter-label-sm mb-2">
               Genre
             </Label>
             <Filter
@@ -318,7 +308,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
 
           {/* Media Type Filter */}
           <div className="flex-1">
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
+            <Label className="block filter-label-sm mb-2">
               Content Type
             </Label>
             <Filter
@@ -333,7 +323,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
 
           {/* Year Filter */}
           <div className="flex-1">
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
+            <Label className="block filter-label-sm mb-2">
               Release Year
             </Label>
             <Filter
@@ -348,7 +338,7 @@ const FilterWrapper: React.FC<FilterWrapperProps> = ({
 
           {/* Rating Filter */}
           <div className="flex-1">
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
+            <Label className="block filter-label-sm mb-2">
               Minimum Rating
             </Label>
             <Filter

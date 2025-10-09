@@ -27,10 +27,10 @@ export function useUpcoming(mediaType: 'movie' | 'tv', page = 1) {
   return useCategoryData(mediaType, 'upcoming', page);
 }
 
-export function useGenres(mediaType: 'movie' | 'tv') {
+export function useGenres() {
   return useSWR<TMDBGenresResponse>(
-    `genres/${mediaType}`,
-    () => api.getGenres(mediaType),
+    'genres',
+    () => api.getGenres(),
     { revalidateOnFocus: false }
   );
 }

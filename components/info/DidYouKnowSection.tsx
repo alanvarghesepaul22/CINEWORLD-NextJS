@@ -61,7 +61,7 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
         throw new Error(data.error || `HTTP ${response.status}`);
       }
 
-      if (data.success && data.facts) {
+      if (data.success && data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
         setFacts(data.facts);
         setHasGenerated(true);
       } else {
@@ -205,9 +205,8 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
             <div className="flex justify-center gap-3 pt-4 border-t border-gray-700/50">
               <Button
                 onClick={generateFacts}
-                variant="outline"
                 size="sm"
-                className="border-primary/40 text-primary hover:bg-primary/10"
+                className="border border-gray-600 text-white font-medium rounded-lg bg-gray-400/20 hover:bg-gray-600/20 transition-colors"
                 disabled={isLoading}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -217,7 +216,7 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
                 onClick={resetFacts}
                 variant="ghost"
                 size="sm"
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white hover:bg-gray-600/20 transition-colors"
               >
                 Reset
               </Button>

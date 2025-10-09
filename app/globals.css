@@ -106,12 +106,7 @@
   .section-hover:hover .chevron-btn-right {
     opacity: 1;
   }
-  
-  /* Global app background gradient */
-  .app-bg {
-    @apply min-h-screen bg-app-gradient;
-  }
-  
+
   /* Enhanced app background with better responsiveness */
   .app-bg-enhanced {
     @apply min-h-screen bg-gradient-to-br from-black via-gray-900 to-black;

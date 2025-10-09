@@ -6,23 +6,32 @@ import {
   TMDBSearchResponse,
   TMDBMovieDetail,
   TMDBTVDetail,
+  TMDBSeasonDetail,
+  TMDBEpisodeDetail,
 } from "./types";
 
 // Support both legacy API_KEY and new ACCESS_TOKEN for backward compatibility
 const ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN;
+const API_KEY = process.env.API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
 
 // Validate environment configuration
 const validateEnvironment = () => {
-  if (!ACCESS_TOKEN) {
+  if (!ACCESS_TOKEN && !API_KEY) {
     throw new Error(
-      "TMDB Access Token not configured. Please set TMDB_ACCESS_TOKEN environment variable."
+      "TMDB credentials not configured. Please set either TMDB_ACCESS_TOKEN or API_KEY environment variable."
     );
   }
-  
-  if (ACCESS_TOKEN.length < 10) {
+
+  if (ACCESS_TOKEN && ACCESS_TOKEN.length < 10) {
     throw new Error(
       "TMDB Access Token appears to be invalid (too short). Please check your TMDB_ACCESS_TOKEN environment variable."
+    );
+  }
+
+  if (API_KEY && API_KEY.length < 10) {
+    throw new Error(
+      "TMDB API Key appears to be invalid (too short). Please check your API_KEY environment variable."
     );
   }
 };
@@ -32,29 +41,42 @@ const checkAccessToken = () => {
 };
 
 const getHeaders = () => ({
-  Authorization: `Bearer ${ACCESS_TOKEN}`,
+  ...(ACCESS_TOKEN ? { Authorization: `Bearer ${ACCESS_TOKEN}` } : {}),
   accept: "application/json",
 });
 
-// Robust fetch wrapper with retry logic and better error handling
-async function fetchWithRetry(
-  url: string, 
-  options: RequestInit = {}, 
-  maxRetries = 3
-): Promise<Response> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for more stable connection
-    
+// Request deduplication cache to prevent duplicate simultaneous requests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const pendingRequests = new Map<string, Promise<any>>();
+
+// Simple fetch wrapper with single call and proper error handling
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function fetchAPI(
+  url: string,
+  options: RequestInit = {}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // Modify URL to include API key if using legacy authentication
+  let requestUrl = url;
+  if (!ACCESS_TOKEN && API_KEY) {
+    requestUrl += `${requestUrl.includes('?') ? '&' : '?'}api_key=${API_KEY}`;
+  }
+
+  // Request deduplication - if same request is in flight, return the pending promise
+  const cacheKey = `${requestUrl}:${JSON.stringify(options)}`;
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey)!;
+  }
+
+  const requestPromise = (async () => {
     try {
       // Add Next.js revalidation for server-side calls
       const fetchOptions: RequestInit = {
         ...options,
-        signal: controller.signal,
         headers: {
           ...getHeaders(), // Always include auth headers
           ...options.headers,
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'application/json',
           'Connection': 'keep-alive',
         },
@@ -62,64 +84,73 @@ async function fetchWithRetry(
 
       // Add revalidation for server-side calls (Next.js SSR/SSG)
       if (typeof window === 'undefined') {
-        fetchOptions.next = { revalidate: 3600 }; // 1 hour revalidation for server-side calls
+        fetchOptions.next = { revalidate: 1800 }; // 30 minutes revalidation for server-side calls
       }
-      
-      const response = await fetch(url, fetchOptions);
-      
-      clearTimeout(timeoutId);
+
+      const response = await fetch(requestUrl, fetchOptions);
       
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
-        throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorText}`);
-      }
-      
-      return response;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      
-      // Enhanced error classification
-      const error_ = error as Error & { code?: string; name?: string; message?: string };
-      const isRetryable = 
-        error instanceof TypeError || 
-        error_.code === 'ECONNRESET' ||
-        error_.code === 'ETIMEDOUT' ||
-        error_.code === 'ECONNREFUSED' ||
-        error_.code === 'ENOTFOUND' ||
-        error_.code === 'EAI_AGAIN' ||
-        error_.name === 'AbortError' ||
-        error_.name === 'TimeoutError' ||
-        // Retry on 5xx server errors and some 4xx errors
-        (error_.message?.includes('500') || 
-         error_.message?.includes('502') || 
-         error_.message?.includes('503') || 
-         error_.message?.includes('504') ||
-         error_.message?.includes('429')); // Rate limit
-      
-      if (attempt === maxRetries || !isRetryable) {
-        console.error(`TMDB API fetch failed after ${attempt} attempts for ${url}:`, {
-          error: error.message,
-          code: error_.code,
-          name: error_.name,
-        });
+        const error = new Error(`HTTP ${response.status} ${response.statusText}: ${errorText}`) as Error & { 
+          status: number;
+          code: string;
+        };
+        error.status = response.status;
+        
+        // Set appropriate error codes
+        switch (response.status) {
+          case 404:
+            error.code = 'NOT_FOUND';
+            break;
+          case 401:
+            error.code = 'UNAUTHORIZED';
+            break;
+          case 403:
+            error.code = 'FORBIDDEN';
+            break;
+          case 429:
+            error.code = 'RATE_LIMITED';
+            break;
+          case 500:
+            error.code = 'SERVER_ERROR';
+            break;
+          default:
+            error.code = 'API_ERROR';
+        }
+        
         throw error;
       }
       
-      // Exponential backoff with jitter: 1s + random, 2s + random, 4s + random
-      const baseDelay = Math.pow(2, attempt - 1) * 1000;
-      const jitter = Math.random() * 1000; // Add up to 1 second of jitter
-      const delay = baseDelay + jitter;
+      return response.json();
+    } catch (error) {
+      const error_ = error as Error & { code?: string; status?: number };
       
-      console.warn(`TMDB API attempt ${attempt}/${maxRetries} failed for ${url}, retrying in ${Math.round(delay)}ms:`, {
-        error: error.message,
-        code: error_.code,
-      });
+      // Handle network errors (fetch failed, timeout, etc.)
+      if (!error_.status) {
+        const networkError = new Error('Network error or API unavailable') as Error & { 
+          status: number;
+          code: string;
+        };
+        networkError.status = 0;
+        networkError.code = 'NETWORK_ERROR';
+        throw networkError;
+      }
       
-      await new Promise(resolve => setTimeout(resolve, delay));
+      // Re-throw API errors as-is
+      throw error;
     }
+  })();
+
+  // Store the pending request
+  pendingRequests.set(cacheKey, requestPromise);
+
+  try {
+    const response = await requestPromise;
+    return response;
+  } finally {
+    // Clean up the pending request after a short delay to allow deduplication
+    setTimeout(() => pendingRequests.delete(cacheKey), 1000);
   }
-  
-  throw new Error('All retry attempts failed');
 }
 
 // Function overloads for getDetails
@@ -137,10 +168,27 @@ async function getDetails(
     throw new Error(`Invalid ${mediaType} ID: ${id}. ID must be a positive integer.`);
   }
   
-  const response = await fetchWithRetry(`${BASE_URL}/${mediaType}/${id}`, {
-    headers: getHeaders(),
-  });
-  return response.json();
+  try {
+    return await fetchAPI(`${BASE_URL}/${mediaType}/${id}`, {
+      headers: getHeaders(),
+    });
+  } catch (error) {
+    const error_ = error as Error & { status?: number; code?: string };
+    
+    // Throw a specific error for 404 not found
+    if (error_.status === 404) {
+      const notFoundError = new Error(`${mediaType === 'movie' ? 'Movie' : 'TV Show'} not found`) as Error & { 
+        status: number; 
+        code: string;
+      };
+      notFoundError.status = 404;
+      notFoundError.code = 'NOT_FOUND';
+      throw notFoundError;
+    }
+    
+    // Re-throw other errors as-is
+    throw error;
+  }
 }
 
 export const api = {
@@ -154,13 +202,12 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/trending/${mediaType}/${timeWindow}?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Popular
@@ -172,13 +219,12 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/${mediaType}/popular?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Top Rated
@@ -190,13 +236,12 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/${mediaType}/top_rated?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Now Playing / On The Air
@@ -209,13 +254,12 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/${mediaType}/${endpoint}?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Upcoming / Airing Today
@@ -228,22 +272,20 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/${mediaType}/${endpoint}?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Genres
-  async getGenres(mediaType: "movie" | "tv"): Promise<TMDBGenresResponse> {
+  async getGenres(): Promise<TMDBGenresResponse> {
     checkAccessToken();
-    const response = await fetchWithRetry(`${BASE_URL}/genre/${mediaType}/list`, {
+    return await fetchAPI(`${BASE_URL}/genre/movie/list`, {
       headers: getHeaders(),
     });
-    return response.json();
   },
 
   // Discover with filters
@@ -270,13 +312,12 @@ export const api = {
       }),
     });
 
-    const response = await fetchWithRetry(
+    return await fetchAPI(
       `${BASE_URL}/discover/${mediaType}?${searchParams}`,
       {
         headers: getHeaders(),
       }
     );
-    return response.json();
   },
 
   // Search
@@ -291,14 +332,98 @@ export const api = {
       page: page.toString(),
     });
 
-    const response = await fetchWithRetry(`${BASE_URL}/search/multi?${searchParams}`, {
+    return await fetchAPI(`${BASE_URL}/search/multi?${searchParams}`, {
       headers: getHeaders(),
     });
-    return response.json();
   },
 
   // Get details with type-safe overloads
   getDetails,
+
+  // Get season details
+  async getSeasonDetails(
+    seriesId: number,
+    seasonNumber: number
+  ): Promise<TMDBSeasonDetail> {
+    checkAccessToken();
+    
+    // Validate that the IDs are positive integers
+    if (!Number.isInteger(seriesId) || seriesId <= 0) {
+      throw new Error(`Invalid series ID: ${seriesId}. ID must be a positive integer.`);
+    }
+    
+    if (!Number.isInteger(seasonNumber) || seasonNumber < 0) {
+      throw new Error(`Invalid season number: ${seasonNumber}. Season number must be a non-negative integer.`);
+    }
+    
+    try {
+      const result = await fetchAPI(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`, {
+        headers: getHeaders(),
+      });
+      return result;
+    } catch (error) {
+      const error_ = error as Error & { status?: number };
+      
+      // Throw a specific error for 404 not found
+      if (error_.status === 404) {
+        const notFoundError = new Error(`Season ${seasonNumber} of series ${seriesId} not found`) as Error & { 
+          status: number; 
+          code: string;
+        };
+        notFoundError.status = 404;
+        notFoundError.code = 'NOT_FOUND';
+        throw notFoundError;
+      }
+      
+      // Re-throw other errors as-is
+      throw error;
+    }
+  },
+
+  // Get episode details
+  async getEpisodeDetails(
+    seriesId: number,
+    seasonNumber: number,
+    episodeNumber: number
+  ): Promise<TMDBEpisodeDetail> {
+    checkAccessToken();
+    
+    // Validate that the IDs are positive integers
+    if (!Number.isInteger(seriesId) || seriesId <= 0) {
+      throw new Error(`Invalid series ID: ${seriesId}. ID must be a positive integer.`);
+    }
+    
+    if (!Number.isInteger(seasonNumber) || seasonNumber < 0) {
+      throw new Error(`Invalid season number: ${seasonNumber}. Season number must be a non-negative integer.`);
+    }
+    
+    if (!Number.isInteger(episodeNumber) || episodeNumber <= 0) {
+      throw new Error(`Invalid episode number: ${episodeNumber}. Episode number must be a positive integer.`);
+    }
+    
+    try {
+      const result = await fetchAPI(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`, {
+        headers: getHeaders(),
+      });
+      return result;
+    } catch (error) {
+      const error_ = error as Error & { status?: number };
+      
+      // Throw a specific error for 404 not found
+      if (error_.status === 404) {
+        const notFoundError = new Error(`Episode ${episodeNumber} of season ${seasonNumber} for series ${seriesId} not found`) as Error & { 
+          status: number; 
+          code: string;
+        };
+        notFoundError.status = 404;
+        notFoundError.code = 'NOT_FOUND';
+        throw notFoundError;
+      }
+      
+      // Re-throw other errors as-is
+      throw error;
+    }
+  },
 
   // Generic method to get media with category and filters
   async getMedia<T extends "movie" | "tv">(
@@ -339,11 +464,10 @@ export const api = {
       }
       
       const searchParams = new URLSearchParams(params);
-      const response = await fetchWithRetry(
+      const data = await fetchAPI(
         `${BASE_URL}/discover/${mediaType}?${searchParams}`,
         { headers: getHeaders() }
       );
-      const data = await response.json();
       return data as T extends "movie" ? TMDBMovieResponse : TMDBTVResponse;
     }
 
@@ -381,11 +505,10 @@ export const api = {
         endpoint = `${BASE_URL}/${mediaType}/popular`;
     }
 
-    const response = await fetchWithRetry(
+    const data = await fetchAPI(
       `${endpoint}?${searchParams}`,
       { headers: getHeaders() }
     );
-    const data = await response.json();
     return data as T extends "movie" ? TMDBMovieResponse : TMDBTVResponse;
   },
 
@@ -394,7 +517,7 @@ export const api = {
     const startTime = Date.now();
     try {
       checkAccessToken();
-      await fetchWithRetry(`${BASE_URL}/configuration`, {
+      await fetchAPI(`${BASE_URL}/configuration`, {
         headers: getHeaders(),
       });
       const latency = Date.now() - startTime;

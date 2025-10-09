@@ -1,9 +1,19 @@
-import React from 'react';
-import { Star, Calendar, Clock, Users, Tv, Film, Play, RotateCcw, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import {
+  Star,
+  Calendar,
+  Clock,
+  Users,
+  Tv,
+  Film,
+  Play,
+  RotateCcw,
+  Check,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MediaMetaProps {
-  type: 'movie' | 'tv';
+  type: "movie" | "tv";
   title: string;
   year?: string;
   rating?: number;
@@ -39,7 +49,7 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
   genres,
   overview,
   watchControls,
-  className = ""
+  className = "",
 }) => {
   return (
     <div className={`space-y-6 ${className}`}>
@@ -53,8 +63,7 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
                 <Button
                   onClick={watchControls.onStartOver}
                   size="sm"
-                  className="bg-gray-600/80 hover:bg-gray-500/80 text-white border border-gray-500/50 
-                           smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
+                  className="bg-gray-600/80 hover:bg-gray-500/80 text-white border border-gray-500/50 smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
                 >
                   <RotateCcw className="w-3 h-3 mr-1 group-hover:rotate-180 smooth-transition" />
                   Start Over
@@ -64,8 +73,7 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
                   <Button
                     onClick={watchControls.onMarkWatched}
                     size="sm"
-                    className="bg-primary hover:bg-primary/90 text-black font-semibold 
-                             smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
+                    className="bg-primary hover:bg-primary/90 text-black font-semibold smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
                   >
                     <Check className="w-3 h-3 mr-1 group-hover:scale-110 smooth-transition" />
                     Watched
@@ -85,14 +93,13 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
                 <Button
                   onClick={watchControls.onMarkWatched}
                   size="sm"
-                  className="bg-primary hover:bg-primary/90 text-black font-semibold 
-                           smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
+                  className="bg-primary hover:bg-primary/90 text-black font-semibold smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
                 >
                   <Play className="w-3 h-3 mr-1 group-hover:translate-x-0.5 smooth-transition" />
                   Mark Watched
                 </Button>
               )}
-              
+
               {/* Progress indicator */}
               <div className="text-xs text-center">
                 {watchControls.isWatched ? (
@@ -112,10 +119,16 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
 
         {/* Media Type Badge */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 
-                        rounded-full text-xs font-semibold border border-primary/30">
-            {type === 'movie' ? <Film className="w-4 h-4" /> : <Tv className="w-4 h-4" />}
-            {type === 'movie' ? 'Movie' : 'TV Series'}
+          <div
+            className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 
+                        rounded-full text-xs font-semibold border border-primary/30"
+          >
+            {type === "movie" ? (
+              <Film className="w-4 h-4" />
+            ) : (
+              <Tv className="w-4 h-4" />
+            )}
+            {type === "movie" ? "Movie" : "TV Series"}
           </div>
         </div>
 
@@ -132,34 +145,40 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
               <span className="font-medium">{year}</span>
             </div>
           )}
-          
-          {type === 'movie' && runtime && (
+
+          {type === "movie" && runtime && (
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
               <span className="font-medium">{runtime} min</span>
             </div>
           )}
-          
-          {type === 'tv' && seasons && (
+
+          {type === "tv" && seasons && (
             <div className="flex items-center gap-2">
               <Tv className="w-4 h-4 text-primary" />
-              <span className="font-medium">{seasons} Season{seasons !== 1 ? 's' : ''}</span>
+              <span className="font-medium">
+                {seasons} Season{seasons !== 1 ? "s" : ""}
+              </span>
             </div>
           )}
-          
-          {type === 'tv' && episodes && (
+
+          {type === "tv" && episodes && (
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
-              <span className="font-medium">{episodes} Episode{episodes !== 1 ? 's' : ''}</span>
+              <span className="font-medium">
+                {episodes} Episode{episodes !== 1 ? "s" : ""}
+              </span>
             </div>
           )}
-          
+
           {rating && (
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />
               <span className="font-bold text-white">{rating.toFixed(1)}</span>
               {ratingCount && (
-                <span className="text-sm text-gray-400">({ratingCount.toLocaleString()})</span>
+                <span className="text-sm text-gray-400">
+                  ({ratingCount.toLocaleString()})
+                </span>
               )}
             </div>
           )}
@@ -187,9 +206,7 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
         {overview && (
           <div className="pt-2">
             <h3 className="text-lg font-semibold text-white mb-3">Overview</h3>
-            <p className="text-gray-300 leading-relaxed text-sm">
-              {overview}
-            </p>
+            <p className="text-gray-300 leading-relaxed text-sm">{overview}</p>
           </div>
         )}
       </div>

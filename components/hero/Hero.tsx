@@ -5,20 +5,98 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
+import { api } from "@/lib/api";
 import { useWatchlist } from "@/lib/useWatchlist";
 import { Button } from "@/components/ui/button";
 import { Play, Plus, Check, Pause, PlayIcon } from "lucide-react";
 
-interface HeroProps {
-  slides: (TMDBMovie | TMDBTVShow)[];
-}
-
-export default function Hero({ slides }: HeroProps) {
+export default function Hero() {
+  const [slides, setSlides] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [announceText, setAnnounceText] = useState("");
   const router = useRouter();
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+
+  // Fetch hero slides data
+  useEffect(() => {
+    const fetchHeroSlides = async () => {
+      try {
+        // Try to fetch both movie and TV data with individual error handling
+        const [movieResult, tvResult] = await Promise.allSettled([
+          api.getPopular("movie", 1),
+          api.getPopular("tv", 1),
+        ]);
+
+        const movieData =
+          movieResult.status === "fulfilled"
+            ? movieResult.value.results.slice(0, 4)
+            : [];
+        const tvData =
+          tvResult.status === "fulfilled"
+            ? tvResult.value.results.slice(0, 3)
+            : [];
+
+        // Log any failures for debugging
+        if (movieResult.status === "rejected") {
+          console.warn(
+            "Failed to fetch popular movies for hero:",
+            movieResult.reason
+          );
+        }
+        if (tvResult.status === "rejected") {
+          console.warn(
+            "Failed to fetch popular TV shows for hero:",
+            tvResult.reason
+          );
+        }
+
+        // Combine available data
+        const combined = [...movieData, ...tvData];
+
+        // If we have no data at all, return some fallback data or empty array
+        if (combined.length === 0) {
+          console.warn("No hero slides data available, using empty array");
+          setSlides([]);
+          return;
+        }
+
+        // Validate and normalize dates to timestamps
+        const getValidTimestamp = (
+          dateStr: string | null | undefined
+        ): number => {
+          if (!dateStr || dateStr.trim() === "") {
+            return Number.NEGATIVE_INFINITY; // Sort invalid dates to end
+          }
+          const timestamp = Date.parse(dateStr);
+          return isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+        };
+
+        const sortedSlides = combined.sort((a, b) => {
+          // Extract candidate date strings
+          const dateStringA =
+            "release_date" in a ? a.release_date : a.first_air_date;
+          const dateStringB =
+            "release_date" in b ? b.release_date : b.first_air_date;
+
+          const timestampA = getValidTimestamp(dateStringA);
+          const timestampB = getValidTimestamp(dateStringB);
+
+          return timestampB - timestampA; // Latest first
+        });
+
+        setSlides(sortedSlides);
+      } catch (error) {
+        console.error("Critical error in fetchHeroSlides:", error);
+        setSlides([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroSlides();
+  }, []);
 
   // Reset currentIndex if it becomes invalid when slides array changes
   useEffect(() => {
@@ -33,7 +111,9 @@ export default function Hero({ slides }: HeroProps) {
       const currentSlide = slides[currentIndex];
       const isTV = "name" in currentSlide;
       const title = isTV ? currentSlide.name : currentSlide.title;
-      setAnnounceText(`Now showing: ${title}, slide ${currentIndex + 1} of ${slides.length}`);
+      setAnnounceText(
+        `Now showing: ${title}, slide ${currentIndex + 1} of ${slides.length}`
+      );
     }
   }, [currentIndex, slides]);
 
@@ -42,7 +122,7 @@ export default function Hero({ slides }: HeroProps) {
     if (!slides || slides.length <= 1 || isPaused) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
+      setCurrentIndex((prevIndex) =>
         prevIndex === slides.length - 1 ? 0 : prevIndex + 1
       );
     }, 10000); // 10 seconds
@@ -51,6 +131,14 @@ export default function Hero({ slides }: HeroProps) {
   }, [slides, isPaused]);
 
   // Early return after all hooks are called
+  if (loading) {
+    return (
+      <div className="relative h-screen w-full bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   if (!slides || slides.length === 0) {
     return <div className="relative h-screen w-full bg-black" />;
   }
@@ -81,14 +169,18 @@ export default function Hero({ slides }: HeroProps) {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ): void {
     event.preventDefault();
-    if (isInWatchlist(currentSlide.id)) {
-      removeFromWatchlist(currentSlide.id);
+    const mediaType = isTV ? "tv" : "movie";
+    if (isInWatchlist(currentSlide.id, mediaType)) {
+      removeFromWatchlist(currentSlide.id, mediaType);
     } else {
       addToWatchlist(currentSlide);
     }
   }
 
-  const isInWatchlistState = isInWatchlist(currentSlide.id);
+  const isInWatchlistState = isInWatchlist(
+    currentSlide.id,
+    isTV ? "tv" : "movie"
+  );
 
   // Handle mouse interactions for accessibility
   const handleMouseEnter = () => {
@@ -131,20 +223,20 @@ export default function Hero({ slides }: HeroProps) {
     if (event.currentTarget !== event.target) return;
 
     switch (event.key) {
-      case 'ArrowLeft':
+      case "ArrowLeft":
         event.preventDefault();
-        setCurrentIndex((prevIndex) => 
+        setCurrentIndex((prevIndex) =>
           prevIndex === 0 ? slides.length - 1 : prevIndex - 1
         );
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         event.preventDefault();
-        setCurrentIndex((prevIndex) => 
+        setCurrentIndex((prevIndex) =>
           prevIndex === slides.length - 1 ? 0 : prevIndex + 1
         );
         break;
-      case ' ':
-      case 'Enter':
+      case " ":
+      case "Enter":
         event.preventDefault();
         togglePause();
         break;
@@ -152,7 +244,7 @@ export default function Hero({ slides }: HeroProps) {
   };
 
   return (
-    <div 
+    <div
       className="hero-carousel-focus relative h-screen w-full overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -271,14 +363,16 @@ export default function Hero({ slides }: HeroProps) {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-theme-primary focus:ring-offset-2 focus:ring-offset-black ${
-                index === currentIndex ? "bg-theme-primary" : "bg-white/50 hover:bg-white/70"
+                index === currentIndex
+                  ? "bg-theme-primary"
+                  : "bg-white/50 hover:bg-white/70"
               }`}
               aria-label={`Go to slide ${index + 1}`}
               aria-current={index === currentIndex ? "true" : "false"}
             />
           ))}
         </div>
-        
+
         {/* Pause/Play control - only show if multiple slides */}
         {slides.length > 1 && (
           <button
@@ -305,11 +399,7 @@ export default function Hero({ slides }: HeroProps) {
       )}
 
       {/* Screen reader announcements */}
-      <div 
-        className="sr-only" 
-        aria-live="polite" 
-        aria-atomic="true"
-      >
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
         {announceText}
       </div>
     </div>

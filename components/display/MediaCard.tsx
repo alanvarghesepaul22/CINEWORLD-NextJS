@@ -29,12 +29,13 @@ const MediaCard: React.FC<MediaCardProps> = ({
   const isTV = isTVShow(media);
   const href = isTV ? `/series/${media.id}` : `/movie/${media.id}`;
   const titleVal = isTV ? media.name : media.title;
+  const mediaType = isTV ? 'tv' : 'movie';
 
   const poster_path = media.poster_path
     ? `https://image.tmdb.org/t/p/w342/${media.poster_path}`
     : "https://i.imgur.com/wjVuAGb.png";
 
-  const inWatchlist = isInWatchlist(media.id);
+  const inWatchlist = isInWatchlist(media.id, mediaType);
 
   // Dynamic classes based on variant
   const getCardClasses = () => {
@@ -63,7 +64,8 @@ const MediaCard: React.FC<MediaCardProps> = ({
             e.preventDefault();
             e.stopPropagation();
             if (inWatchlist) {
-              removeFromWatchlist(media.id);
+              // Pass type to ensure correct item is removed
+              removeFromWatchlist(media.id, mediaType);
             } else {
               addToWatchlist(media);
             }

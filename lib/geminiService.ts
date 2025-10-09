@@ -5,6 +5,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
+import { getLogger } from "./logger";
 
 interface MovieData {
   title?: string;
@@ -37,10 +38,20 @@ interface AISuggestionResponse {
 
 class GeminiService {
   private ai: GoogleGenAI;
+  private logger = getLogger();
+  // Use the latest stable Gemini 2.5 Flash model for best performance
+  private readonly MODEL_NAME = "gemini-2.5-flash";
 
   constructor(apiKey: string) {
-    // The GoogleGenAI client gets the API key from the environment variable or constructor
+    if (!apiKey || apiKey.trim().length === 0) {
+      throw new Error("Invalid API key provided");
+    }
+    
+    // Initialize the GoogleGenAI client with API key
     this.ai = new GoogleGenAI({ apiKey });
+    this.logger.info("GeminiService initialized successfully", {
+      model: this.MODEL_NAME
+    });
   }
 
   /**
@@ -194,24 +205,42 @@ IMPORTANT GUIDELINES:
    */
   async generateSuggestion(): Promise<AISuggestionResponse> {
     try {
+      this.logger.info("Generating AI suggestion");
       const prompt = this.createSuggestionPrompt();
 
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: this.MODEL_NAME,
         contents: prompt,
       });
 
-      if (!response.text || response.text.trim().length === 0) {
+      // Check if response exists and has text
+      if (!response || !response.text) {
+        this.logger.error("Empty or invalid response from Gemini API", {
+          hasResponse: !!response,
+          responseKeys: response ? Object.keys(response) : []
+        });
         throw new Error("Empty response from Gemini API");
       }
 
+      const responseText = response.text.trim();
+      
+      if (responseText.length === 0) {
+        this.logger.error("Response text is empty");
+        throw new Error("Empty response text from Gemini API");
+      }
+
+      this.logger.debug("Received AI suggestion response", {
+        responseLength: responseText.length,
+        responsePreview: responseText.substring(0, 100)
+      });
+
       // Clean and parse the JSON response
-      const cleanedText = response.text
-        .trim()
+      const cleanedText = responseText
         .replace(/^```json\s*/i, "")
         .replace(/```\s*$/i, "")
         .replace(/^```\s*/i, "")
-        .replace(/```\s*$/i, "");
+        .replace(/```\s*$/i, "")
+        .trim();
 
       try {
         const suggestion = JSON.parse(cleanedText);
@@ -228,6 +257,11 @@ IMPORTANT GUIDELINES:
           suggestion.searchKeyword &&
           (suggestion.type === 'movie' || suggestion.type === 'series')
         ) {
+          this.logger.info("Successfully generated AI suggestion", {
+            title: suggestion.title,
+            type: suggestion.type
+          });
+          
           return {
             suggestion: {
               title: suggestion.title.trim(),
@@ -241,23 +275,33 @@ IMPORTANT GUIDELINES:
           };
         }
 
+        this.logger.error("Invalid suggestion format received", {
+          hasTitle: !!suggestion?.title,
+          hasYear: !!suggestion?.year,
+          hasType: !!suggestion?.type,
+          type: suggestion?.type
+        });
         throw new Error("Invalid suggestion format received from AI");
       } catch (parseError) {
         // Log the JSON parsing error with cleaned text for debugging
-        console.error('JSON parsing failed for AI suggestion response:', {
+        this.logger.error('JSON parsing failed for AI suggestion response', {
           error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
-          cleanedText: cleanedText,
-          originalResponse: response.text,
-          timestamp: new Date().toISOString()
+          cleanedTextPreview: cleanedText.substring(0, 200),
+          originalResponsePreview: responseText.substring(0, 200)
         });
 
         throw new Error("Failed to parse AI suggestion response");
       }
     } catch (error) {
+      this.logger.error("Error generating AI suggestion", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        errorName: error instanceof Error ? error.name : "UnknownError"
+      });
+
       if (error instanceof Error) {
         const errorMessage = error.message.toLowerCase();
 
-        if (errorMessage.includes("api key")) {
+        if (errorMessage.includes("api key") || errorMessage.includes("authentication")) {
           return this.createEmptySuggestionError("AI service authentication failed. Please check configuration.");
         }
 
@@ -275,7 +319,7 @@ IMPORTANT GUIDELINES:
           return this.createEmptySuggestionError("AI model temporarily unavailable. Please try again later.");
         }
 
-        if (errorMessage.includes("blocked")) {
+        if (errorMessage.includes("blocked") || errorMessage.includes("safety")) {
           return this.createEmptySuggestionError("Content was blocked by safety filters. Please try again.");
         }
       }
@@ -291,27 +335,46 @@ IMPORTANT GUIDELINES:
       const title = isTV ? data.name : data.title;
 
       if (!title) {
+        this.logger.error("Title is required for generating facts");
         throw new Error("Title is required");
       }
 
+      this.logger.info("Generating AI facts", { title, isTV });
       const prompt = this.createMoviePrompt(data);
 
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: this.MODEL_NAME,
         contents: prompt,
       });
 
-      if (!response.text || response.text.trim().length === 0) {
+      // Check if response exists and has text
+      if (!response || !response.text) {
+        this.logger.error("Empty or invalid response from Gemini API", {
+          hasResponse: !!response,
+          responseKeys: response ? Object.keys(response) : []
+        });
         throw new Error("Empty response from Gemini API");
       }
 
+      const responseText = response.text.trim();
+      
+      if (responseText.length === 0) {
+        this.logger.error("Response text is empty");
+        throw new Error("Empty response text from Gemini API");
+      }
+
+      this.logger.debug("Received AI facts response", {
+        responseLength: responseText.length,
+        responsePreview: responseText.substring(0, 100)
+      });
+
       // Clean and parse the JSON response
-      const cleanedText = response.text
-        .trim()
+      const cleanedText = responseText
         .replace(/^```json\s*/i, "")
         .replace(/```\s*$/i, "")
         .replace(/^```\s*/i, "")
-        .replace(/```\s*$/i, "");
+        .replace(/```\s*$/i, "")
+        .trim();
 
       try {
         const facts = JSON.parse(cleanedText);
@@ -324,6 +387,11 @@ IMPORTANT GUIDELINES:
             .slice(0, 10);
 
           if (validFacts.length > 0) {
+            this.logger.info("Successfully generated AI facts", {
+              title,
+              factsCount: validFacts.length
+            });
+            
             return {
               facts: validFacts,
               success: true,
@@ -331,19 +399,28 @@ IMPORTANT GUIDELINES:
           }
         }
 
+        this.logger.error("Invalid facts format received", {
+          isArray: Array.isArray(facts),
+          factsLength: Array.isArray(facts) ? facts.length : 0
+        });
         throw new Error("Invalid facts format received from AI");
       } catch (parseError) {
         // Log the JSON parsing error with raw response for debugging
-        console.error('JSON parsing failed for AI facts response:', {
+        this.logger.error('JSON parsing failed for AI facts response', {
           error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
-          rawResponse: response.text,
-          timestamp: new Date().toISOString()
+          cleanedTextPreview: cleanedText.substring(0, 200),
+          originalResponsePreview: responseText.substring(0, 200)
         });
 
         // Fallback: Extract facts using helper method
-        const extractedFacts = this.extractFactsFromText(response.text);
+        this.logger.info("Attempting fallback fact extraction");
+        const extractedFacts = this.extractFactsFromText(responseText);
 
         if (extractedFacts.length > 0) {
+          this.logger.info("Successfully extracted facts using fallback method", {
+            factsCount: extractedFacts.length
+          });
+          
           return {
             facts: extractedFacts,
             success: true,
@@ -353,10 +430,15 @@ IMPORTANT GUIDELINES:
         throw new Error("Failed to extract facts from AI response");
       }
     } catch (error) {
+      this.logger.error("Error generating AI facts", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        errorName: error instanceof Error ? error.name : "UnknownError"
+      });
+
       if (error instanceof Error) {
         const errorMessage = error.message.toLowerCase();
 
-        if (errorMessage.includes("api key")) {
+        if (errorMessage.includes("api key") || errorMessage.includes("authentication")) {
           return this.createEmptyFactsError(
             "AI service authentication failed. Please check configuration."
           );
@@ -376,7 +458,7 @@ IMPORTANT GUIDELINES:
           return this.createEmptyFactsError("AI model temporarily unavailable. Please try again later.");
         }
 
-        if (errorMessage.includes("blocked")) {
+        if (errorMessage.includes("blocked") || errorMessage.includes("safety")) {
           return this.createEmptyFactsError(
             "Content was blocked by safety filters. Please try a different title."
           );
@@ -400,12 +482,30 @@ export function getGeminiService(): GeminiService {
   if (!geminiServiceInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey) {
+    if (!apiKey || apiKey.trim().length === 0) {
+      const logger = getLogger();
+      logger.error("GEMINI_API_KEY environment variable is not configured or empty");
       throw new Error("GEMINI_API_KEY environment variable is not configured");
     }
-    geminiServiceInstance = new GeminiService(apiKey);
+    
+    try {
+      geminiServiceInstance = new GeminiService(apiKey);
+    } catch (error) {
+      const logger = getLogger();
+      logger.error("Failed to initialize GeminiService", {
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+      throw error;
+    }
   }
   return geminiServiceInstance;
+}
+
+/**
+ * Reset the Gemini service instance (useful for testing or reinitialization)
+ */
+export function resetGeminiService(): void {
+  geminiServiceInstance = null;
 }
 
 export type { MovieData, AIFactsResponse, AISuggestionResponse };

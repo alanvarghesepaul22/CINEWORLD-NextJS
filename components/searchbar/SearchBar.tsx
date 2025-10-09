@@ -139,7 +139,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue 
         {isFocused && searchValue && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-black/95 backdrop-blur-lg border border-gray-700 rounded-xl shadow-xl z-50">
             <div className="p-3 text-gray-400 text-sm">
-              Press Enter or click search to find &ldquo;{searchValue}&rdquo;
+              {searchValue.length < 3 
+                ? `Type ${3 - searchValue.length} more character${3 - searchValue.length !== 1 ? 's' : ''} to search`
+                : `Press Enter or click search to find "${searchValue}"`
+              }
             </div>
           </div>
         )}

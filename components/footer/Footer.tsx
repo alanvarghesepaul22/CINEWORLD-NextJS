@@ -23,40 +23,30 @@ const Footer: React.FC = () => {
           {/* Quick Links */}
           <div className="flex flex-col items-center">
             <div className="flex flex-wrap justify-center gap-6 mb-4">
-              <Link 
-                href="/" 
-                className="footer-link group"
-              >
-                Home
-                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
-              </Link>
-              <Link 
-                href="/movie" 
-                className="footer-link group"
-              >
-                Movies
-                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
-              </Link>
-              <Link 
-                href="/series" 
-                className="footer-link group"
-              >
-                Series
-                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
-              </Link>
-              <Link 
-                href="/watchlist" 
-                className="footer-link group"
-              >
-                Watchlist
-                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
-              </Link>
+              {[
+                { href: "/", label: "Home" },
+                { href: "/movie", label: "Movies" },
+                { href: "/series", label: "Series" },
+                { href: "/watchlist", label: "Watchlist" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="relative footer-link group"
+                >
+                  {item.label}
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
+                </Link>
+              ))}
             </div>
-            
+
             {/* Copyright */}
             <div className="flex items-center gap-2 text-center text-gray-400 text-sm">
               <span>Made with</span>
-              <Heart className="h-4 w-4 text-red-500 fill-current animate-pulse" aria-hidden="true" />
+              <Heart
+                className="h-4 w-4 text-red-500 fill-current animate-pulse"
+                aria-hidden="true"
+              />
               <span>© {new Date().getFullYear()} Cineworld</span>
             </div>
           </div>

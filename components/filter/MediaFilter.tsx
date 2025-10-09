@@ -3,35 +3,75 @@ import React, { useState, useEffect } from "react";
 import Filter from "./Filter";
 import { Label } from "@/components/ui/label";
 import { TMDBGenre } from "@/lib/types";
-import { api } from "@/lib/api";
 
-interface MovieFiltersData {
+interface MediaFiltersData {
   category: string;
   genre: string;
   year: string;
   sortBy: string;
 }
 
-interface MovieFiltersProps {
-  initialFilters: MovieFiltersData;
-  onFiltersChange: (filters: MovieFiltersData) => void;
+interface CategoryOption {
+  value: string;
+  label: string;
 }
 
-const MovieFilters: React.FC<MovieFiltersProps> = ({
-  initialFilters,
-  onFiltersChange
-}) => {
-  const [filters, setFilters] = useState<MovieFiltersData>(initialFilters);
-  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+interface SortOption {
+  value: string;
+  label: string;
+}
 
+interface MediaFilterProps {
+  initialFilters: MediaFiltersData;
+  onFiltersChange: (filters: MediaFiltersData) => void;
+  type?: "movie" | "tv";
+}
+
+const MediaFilter: React.FC<MediaFilterProps> = ({
+  initialFilters,
+  onFiltersChange,
+  type = "movie",
+}) => {
+  const [filters, setFilters] = useState<MediaFiltersData>(initialFilters);
+  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+  const sortOptions: SortOption[] = [
+    { value: "popularity.desc", label: "Most Popular" },
+    { value: "vote_average.desc", label: "Highest Rated" },
+    { value: "release_date.desc", label: "Newest First" },
+    { value: "release_date.asc", label: "Oldest First" },
+    { value: "title.asc", label: "A-Z" },
+    { value: "title.desc", label: "Z-A" },
+  ];
+  let categoryOptions: CategoryOption[];
+
+  if (type === "movie") {
+    categoryOptions = [
+      { value: "popular", label: "Popular" },
+      { value: "top_rated", label: "Top Rated" },
+      { value: "now_playing", label: "Now Playing" },
+      { value: "upcoming", label: "Upcoming" },
+    ];
+  } else {
+    categoryOptions = [
+      { value: "popular", label: "Popular" },
+      { value: "top_rated", label: "Top Rated" },
+      { value: "on_the_air", label: "On The Air" },
+      { value: "trending", label: "Trending" },
+    ];
+  }
   // Fetch genres on mount
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const genresData = await api.getGenres('movie');
-        setGenres(genresData.genres);
+        const response = await fetch("/api/genres");
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const genresData = await response.json();
+        setGenres(genresData.genres || []);
       } catch (error) {
-        console.error('Failed to fetch movie genres:', error);
+        console.error("Failed to fetch genres:", error);
+        setGenres([]); // Ensure genres is always an array
       }
     };
     fetchGenres();
@@ -42,23 +82,18 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
     setFilters(initialFilters);
   }, [initialFilters]);
 
-  const handleFilterChange = (filterKey: keyof MovieFiltersData, value: string) => {
+  const handleFilterChange = (
+    filterKey: keyof MediaFiltersData,
+    value: string
+  ) => {
     const newFilters = { ...filters, [filterKey]: value };
     setFilters(newFilters);
     onFiltersChange(newFilters);
   };
 
-  // Filter options
-  const categoryOptions = [
-    { value: "popular", label: "Popular" },
-    { value: "top_rated", label: "Top Rated" },
-    { value: "now_playing", label: "Now Playing" },
-    { value: "upcoming", label: "Upcoming" }
-  ];
-
-  const genreOptions = genres.map(genre => ({ 
-    value: genre.id.toString(), 
-    label: genre.name 
+  const genreOptions = genres.map((genre) => ({
+    value: genre.id.toString(),
+    label: genre.name,
   }));
 
   const yearOptions = Array.from({ length: 30 }, (_, i) => {
@@ -66,75 +101,68 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
     return { value: year.toString(), label: year.toString() };
   });
 
-  const sortOptions = [
-    { value: "popularity.desc", label: "Most Popular" },
-    { value: "vote_average.desc", label: "Highest Rated" },
-    { value: "release_date.desc", label: "Newest First" },
-    { value: "release_date.asc", label: "Oldest First" },
-    { value: "title.asc", label: "A-Z" },
-    { value: "title.desc", label: "Z-A" }
-  ];
-
   return (
     <div className="container mx-auto px-4 mb-8">
       <div className="glass-container">
         {/* Mobile Layout */}
         <div className="block md:hidden">
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div>
+            <>
               <Label className="filter-label-xs mb-1">Category</Label>
               <Filter
                 label="Category"
                 options={categoryOptions}
                 value={filters.category}
-                onChange={(value) => handleFilterChange('category', value)}
+                onChange={(value) => handleFilterChange("category", value)}
                 includeReset={false}
               />
-            </div>
-            <div>
+            </>
+            <>
               <Label className="filter-label-xs mb-1">Genre</Label>
               <Filter
                 label="Genre"
                 options={genreOptions}
                 value={filters.genre}
-                onChange={(value) => handleFilterChange('genre', value)}
+                onChange={(value) => handleFilterChange("genre", value)}
                 includeReset={true}
                 resetLabel="All"
               />
-            </div>
-            <div>
+            </>
+            <>
               <Label className="filter-label-xs mb-1">Year</Label>
               <Filter
                 label="Year"
                 options={yearOptions}
                 value={filters.year}
-                onChange={(value) => handleFilterChange('year', value)}
+                onChange={(value) => handleFilterChange("year", value)}
                 includeReset={true}
                 resetLabel="Any"
               />
-            </div>
-            <div>
+            </>
+            <>
               <Label className="filter-label-xs mb-1">Sort</Label>
               <Filter
                 label="Sort"
                 options={sortOptions}
                 value={filters.sortBy}
-                onChange={(value) => handleFilterChange('sortBy', value)}
+                onChange={(value) => handleFilterChange("sortBy", value)}
                 includeReset={false}
               />
-            </div>
+            </>
           </div>
         </div>
 
         {/* Desktop Layout */}
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Label className="filter-label-sm whitespace-nowrap">Category:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">
+              Category:
+            </Label>
             <Filter
               label="Category"
               options={categoryOptions}
               value={filters.category}
-              onChange={(value) => handleFilterChange('category', value)}
+              onChange={(value) => handleFilterChange("category", value)}
               includeReset={false}
             />
           </div>
@@ -144,7 +172,7 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
               label="Genre"
               options={genreOptions}
               value={filters.genre}
-              onChange={(value) => handleFilterChange('genre', value)}
+              onChange={(value) => handleFilterChange("genre", value)}
               includeReset={true}
               resetLabel="All"
             />
@@ -155,18 +183,20 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
               label="Year"
               options={yearOptions}
               value={filters.year}
-              onChange={(value) => handleFilterChange('year', value)}
+              onChange={(value) => handleFilterChange("year", value)}
               includeReset={true}
               resetLabel="Any"
             />
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <Label className="filter-label-sm whitespace-nowrap">Sort by:</Label>
+            <Label className="filter-label-sm whitespace-nowrap">
+              Sort by:
+            </Label>
             <Filter
               label="Sort"
               options={sortOptions}
               value={filters.sortBy}
-              onChange={(value) => handleFilterChange('sortBy', value)}
+              onChange={(value) => handleFilterChange("sortBy", value)}
               includeReset={false}
             />
           </div>
@@ -176,4 +206,4 @@ const MovieFilters: React.FC<MovieFiltersProps> = ({
   );
 };
 
-export default MovieFilters;
+export default MediaFilter;
