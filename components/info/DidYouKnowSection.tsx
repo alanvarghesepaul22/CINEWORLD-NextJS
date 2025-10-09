@@ -3,20 +3,11 @@
 import React, { useState } from "react";
 import { Lightbulb, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface MovieData {
-  title?: string;
-  name?: string;
-  release_date?: string;
-  first_air_date?: string;
-  overview?: string;
-  genre_ids?: number[];
-  vote_average?: number;
-}
+import { TMDBMovieDetail, TMDBTVDetail } from "@/lib/types";
 
 interface DidYouKnowSectionProps {
   title: string;
-  movieData?: MovieData;
+  movieData?: TMDBMovieDetail | TMDBTVDetail;
   className?: string;
 }
 
@@ -35,6 +26,44 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
   const [hasGenerated, setHasGenerated] = useState(false);
 
   /**
+   * Transform TMDB data to format expected by geminiService
+   */
+  const transformToGeminiFormat = (data: TMDBMovieDetail | TMDBTVDetail) => {
+    const isTV = 'name' in data;
+    
+    const baseData = {
+      id: data.id,
+      overview: data.overview,
+      vote_average: data.vote_average,
+      original_language: data.original_language,
+      genres: data.genres,
+      production_companies: data.production_companies?.map(pc => ({ name: pc.name })),
+    };
+
+    if (isTV) {
+      const tvData = data as TMDBTVDetail;
+      return {
+        ...baseData,
+        name: tvData.name,
+        first_air_date: tvData.first_air_date,
+        created_by: tvData.created_by,
+        episode_run_time: tvData.episode_run_time,
+        number_of_seasons: tvData.number_of_seasons,
+        number_of_episodes: tvData.number_of_episodes,
+        networks: tvData.networks?.map(n => ({ name: n.name })),
+      };
+    } else {
+      const movieData = data as TMDBMovieDetail;
+      return {
+        ...baseData,
+        title: movieData.title,
+        release_date: movieData.release_date,
+        runtime: movieData.runtime,
+      };
+    }
+  };
+
+  /**
    * Fetch AI-generated facts from our API
    */
   const generateFacts = async () => {
@@ -47,12 +76,15 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
     setError(null);
 
     try {
+      // Transform the full TMDB object to the format expected by geminiService
+      const transformedData = transformToGeminiFormat(movieData);
+      
       const response = await fetch('/api/ai-facts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(movieData),
+        body: JSON.stringify(transformedData),
       });
 
       const data = await response.json();

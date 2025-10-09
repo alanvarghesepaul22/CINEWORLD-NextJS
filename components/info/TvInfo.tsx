@@ -166,12 +166,7 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
         <div className="max-w-6xl mx-auto">
           <DidYouKnowSection
             title={title}
-            movieData={{
-              name: title,
-              first_air_date: tvDetail.first_air_date,
-              overview: tvDetail.overview,
-              vote_average: tvDetail.vote_average,
-            }}
+            movieData={tvDetail}
           />
         </div>
       </div>

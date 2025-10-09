@@ -57,7 +57,7 @@ function isValidSuggestion(data: unknown): data is AISuggestion {
 // API Response type definition
 interface AIResponse {
   success?: boolean;
-  suggestion?: string;
+  suggestion?: AISuggestion;
   error?: string;
 }
 

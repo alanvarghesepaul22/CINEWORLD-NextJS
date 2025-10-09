@@ -32,7 +32,7 @@ const nextConfig = {
         API_KEY: process.env.API_KEY,
         TMDB_ACCESS_TOKEN: process.env.TMDB_ACCESS_TOKEN,
       },
-      webpack: (config, { dev, isServer }) => {
+      webpack: (config, { dev }) => {
         // Optimize webpack cache for better stability
         if (dev) {
           config.cache = {

@@ -176,7 +176,10 @@ const SearchPageContent: React.FC = () => {
    */
   const handleSearchInput = (value: string) => {
     setTypedValue(value);
-    updateSearchURL(value);
+    // Only update URL if search query has 3+ characters or is empty (for clearing)
+    if (value.trim().length >= 3 || value.trim().length === 0) {
+      updateSearchURL(value);
+    }
   };
 
   /**

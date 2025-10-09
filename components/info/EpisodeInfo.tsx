@@ -2,7 +2,6 @@ import React from "react";
 import MediaDetailLayout from "../layout/MediaDetailLayout";
 import EpisodeMeta from "./EpisodeMeta";
 import EpisodeNavigation from "../pagination/EpisodeNavigation";
-import DidYouKnowSection from "./DidYouKnowSection";
 import {
   EpisodeSummary,
   TMDBEpisodeDetail,
@@ -22,7 +21,7 @@ async function getEpisodeDetails(
   id: number;
   seasonData: TMDBSeasonDetail | null;
   seriesData: TMDBTVDetail | null;
-  error: "NOT_FOUND" | "FETCH_ERROR" | null;
+  error: "NOT_FOUND" | "FETCH_ERROR" | "NETWORK_ERROR" | null;
 }> {
   try {
     // Validate IDs are numeric and positive
@@ -76,6 +75,20 @@ async function getEpisodeDetails(
       };
     }
 
+    // Check if it's a network error
+    if (error_.code === "NETWORK_ERROR" || error_.status === 0) {
+      console.log(
+        `[EpisodeInfo] Detected NETWORK_ERROR for series ${seriesId}, season ${seasonId}, episode ${episodeId}`
+      );
+      return {
+        data: null,
+        id: parseInt(seriesId, 10) || 0,
+        seasonData: null,
+        seriesData: null,
+        error: "NETWORK_ERROR",
+      };
+    }
+
     console.log(
       `[EpisodeInfo] Detected FETCH_ERROR for series ${seriesId}, season ${seasonId}, episode ${episodeId}`
     );
@@ -107,8 +120,8 @@ const EpisodeInfo = async ({
     error,
   } = await getEpisodeDetails(seriesId, seasonId, episodeId);
 
-  // Handle 404 not found error
-  if (error === "NOT_FOUND") {
+  // Handle any error or missing data
+  if (error || !episodeDetails) {
     return (
       <EpisodeNotFound
         seriesId={seriesId}
@@ -148,14 +161,6 @@ const EpisodeInfo = async ({
           seriesTitle={seriesData?.name}
         />
 
-        {/* Video Player */}
-        {/* <MediaPlayer
-          seriesId={seriesId}
-          seasonNumber={episodeDetails.season_number}
-          episodeNumber={episodeDetails.episode_number}
-          episodeTitle={fullEpisodeDetails.name}
-        /> */}
-
         <MediaPlayer
           mediaId={seriesId}
           title={fullEpisodeDetails.name}
@@ -171,21 +176,6 @@ const EpisodeInfo = async ({
           currentEpisode={episodeDetails.episode_number}
           totalEpisodes={TotalEpisodes}
           totalSeasons={TotalSeasons}
-        />
-
-        {/* Did You Know Section */}
-        <DidYouKnowSection
-          title={`${seriesData?.name || "Series"} - S${
-            episodeDetails.season_number
-          }E${episodeDetails.episode_number}`}
-          movieData={{
-            name: `${seriesData?.name || "Series"} - S${
-              episodeDetails.season_number
-            }E${episodeDetails.episode_number}`,
-            overview: fullEpisodeDetails?.overview || "",
-            first_air_date: fullEpisodeDetails?.air_date || "",
-          }}
-          className="max-w-6xl mx-auto"
         />
       </div>
     </MediaDetailLayout>

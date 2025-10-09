@@ -36,6 +36,14 @@ async function getSeasonDetails(seriesId: string, seasonId: string) {
       return { data: null, id: seriesId, error: "NOT_FOUND" };
     }
 
+    // Check if it's a network error
+    if (error_.code === "NETWORK_ERROR" || error_.status === 0) {
+      console.log(
+        `[SeasonInfo] Detected NETWORK_ERROR for series ${seriesId}, season ${seasonId}`
+      );
+      return { data: null, id: seriesId, error: "NETWORK_ERROR" };
+    }
+
     console.log(
       `[SeasonInfo] Detected FETCH_ERROR for series ${seriesId}, season ${seasonId}`
     );
@@ -56,8 +64,8 @@ const SeasonInfo = async ({
     error,
   } = await getSeasonDetails(seriesId, seasonId);
 
-  // Handle 404 not found error
-  if (error === "NOT_FOUND") {
+  // Handle any error or null data
+  if (error || !SeasonInfos) {
     return <SeasonNotFound seasonId={seasonId} />;
   }
 

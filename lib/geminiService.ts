@@ -1,20 +1,35 @@
 /**
  * Gemini AI Service for Movie & Series Insights
- * Based on official Google GenAI API documentation
- * https://ai.google.dev/gemini-api/docs/quickstart#javascript
+ * Clean, streamlined implementation with fact verification
  */
 
 import { GoogleGenAI } from "@google/genai";
 import { getLogger } from "./logger";
+import { type VerifiedFacts, getFactVerificationService } from "./factVerificationService";
 
 interface MovieData {
   title?: string;
+  name?: string; // For TV series
   release_date?: string;
+  first_air_date?: string;
   overview?: string;
   genre_ids?: number[];
   vote_average?: number;
-  name?: string; // For TV series
-  first_air_date?: string; // For TV series
+  id?: number;
+  director?: string;
+  cast?: string[];
+  runtime?: number;
+  genres?: { id?: number; name: string }[];
+  production_companies?: { name: string }[];
+  original_language?: string;
+  // TV-specific fields
+  created_by?: { name: string }[];
+  episode_run_time?: number[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  networks?: { name: string }[];
+  // Verified facts from web search
+  verified_facts?: VerifiedFacts;
 }
 
 interface AIFactsResponse {
@@ -27,7 +42,7 @@ interface AISuggestionResponse {
   suggestion: {
     title: string;
     year: string;
-    type: 'movie' | 'series';
+    type: "movie" | "series";
     overview: string;
     reason: string;
     searchKeyword: string;
@@ -39,165 +54,188 @@ interface AISuggestionResponse {
 class GeminiService {
   private ai: GoogleGenAI;
   private logger = getLogger();
-  // Use the latest stable Gemini 2.5 Flash model for best performance
   private readonly MODEL_NAME = "gemini-2.5-flash";
 
   constructor(apiKey: string) {
-    if (!apiKey || apiKey.trim().length === 0) {
+    if (!apiKey?.trim()) {
       throw new Error("Invalid API key provided");
     }
-    
-    // Initialize the GoogleGenAI client with API key
+
     this.ai = new GoogleGenAI({ apiKey });
-    this.logger.info("GeminiService initialized successfully", {
-      model: this.MODEL_NAME
-    });
+    this.logger.info("GeminiService initialized successfully");
   }
 
   /**
-   * Creates an expert-level prompt for extracting fascinating movie/series facts
+   * Creates prompt for generating movie/series facts with verified information
    */
   private createMoviePrompt(data: MovieData): string {
-    const isTV = "name" in data;
+    const isTV = !!data.name;
     const title = isTV ? data.name : data.title;
     const releaseYear = isTV
-      ? data.first_air_date
-        ? new Date(data.first_air_date).getFullYear()
-        : "Unknown"
-      : data.release_date
-      ? new Date(data.release_date).getFullYear()
-      : "Unknown";
+      ? data.first_air_date ? new Date(data.first_air_date).getFullYear() : "Unknown"
+      : data.release_date ? new Date(data.release_date).getFullYear() : "Unknown";
 
-    return `You are a renowned film historian and entertainment industry expert. Generate exactly 10 fascinating, lesser-known facts about "${title}" (${releaseYear}).
+    // Include verified facts if available
+    const verifiedFactsSection = data.verified_facts 
+      ? this.formatVerifiedFacts(data.verified_facts)
+      : "";
 
-Focus on these categories:
-🎬 PRODUCTION INSIGHTS: Behind-the-scenes incidents, unique filming techniques, budget surprises, director's creative decisions
-🎭 CAST & CREW STORIES: Actor preparation methods, casting decisions, on-set relationships, method acting stories
-🏆 AWARDS & RECOGNITION: Oscar wins/nominations, industry records, critical vs audience reception
-🎪 CULTURAL IMPACT: Box office surprises, influence on other films, controversial moments, fan theories
-📰 INDUSTRY SECRETS: Studio politics, marketing campaigns, post-production challenges, legacy
+    return `You are an expert cinematic researcher generating exciting facts about movies and TV shows.
 
-${
-  isTV
-    ? "This is a TV series - focus on pilot episodes, season arcs, network decisions, cast changes, and television-specific production elements."
-    : "This is a movie - focus on theatrical release, cinema production, and film industry context."
-}
+${verifiedFactsSection}
 
-Return EXACTLY 10 facts in this JSON format:
-[
-  "Fascinating fact about production or casting",
-  "Behind-the-scenes story or industry secret",
-  "Award or recognition detail",
-  "Cultural impact or legacy information",
-  "Technical or creative innovation",
-  "Actor or crew anecdote",
-  "Box office or financial surprise",
-  "Director or producer insight",
-  "Location or set design detail",
-  "Influence or tribute to other works"
-]
+GOAL: Generate Top 10 most exciting facts about "${title}" (${releaseYear}) - a ${isTV ? "TV Series" : "Movie"}.
 
-IMPORTANT: 
-- Each fact must be 1-2 sentences maximum
-- Be specific and verifiable
-- Focus on surprising or lesser-known information
-- Return ONLY the JSON array, no other text`;
+${data.verified_facts ? 
+`IMPORTANT: Use ONLY the verified facts provided above. Transform them into compelling narratives without adding unverified information.` :
+`Focus on verifiable facts like box office performance, awards, cast details, production stories, and notable controversies.`}
+
+Basic Info:
+- Overview: ${data.overview || "Not available"}
+- Language: ${data.original_language || "en"}
+- Genres: ${data.genres?.map(g => g.name).join(", ") || "various"}
+- Runtime: ${data.runtime ? `${data.runtime} minutes` : "not specified"}
+${data.production_companies?.length ? `- Producers: ${data.production_companies.map(pc => pc.name).join(", ")}` : ""}
+${isTV && data.created_by?.length ? `- Creators: ${data.created_by.map(c => c.name).join(", ")}` : ""}
+${isTV && data.networks?.length ? `- Networks: ${data.networks.map(n => n.name).join(", ")}` : ""}
+${isTV && data.number_of_seasons ? `- Seasons: ${data.number_of_seasons}, Episodes: ${data.number_of_episodes}` : ""}
+
+Requirements:
+1. ${data.verified_facts ? "Use ONLY verified facts above" : "Focus on verifiable, exciting details"}
+2. Format as compelling, single-paragraph facts
+3. Include box office/streaming performance if available
+4. Cover production stories, cast details, awards, controversies
+5. Make each fact attention-grabbing and viral-worthy
+
+Return exactly 10 facts as JSON array:
+["Exciting fact 1", "Exciting fact 2", ...]
+
+Return ONLY the JSON array, no other text.`;
   }
 
   /**
-   * Creates an expert-level prompt for generating movie/series suggestions
+   * Formats verified facts for AI prompt
+   */
+  private formatVerifiedFacts(facts: VerifiedFacts): string {
+    const sections: string[] = [];
+
+    sections.push("=== VERIFIED FACTS (Use ONLY these details) ===");
+
+    if (facts.lead_actor) sections.push(`VERIFIED LEAD ACTOR: ${facts.lead_actor}`);
+    if (facts.director) sections.push(`VERIFIED DIRECTOR: ${facts.director}`);
+    if (facts.box_office) sections.push(`VERIFIED BOX OFFICE: ${facts.box_office}`);
+    if (facts.awards.length > 0) sections.push(`VERIFIED AWARDS: ${facts.awards.join("; ")}`);
+    if (facts.controversies.length > 0) sections.push(`VERIFIED EVENTS: ${facts.controversies.join("; ")}`);
+
+    sections.push(`VERIFICATION CONFIDENCE: ${facts.search_confidence.toUpperCase()}`);
+    sections.push("=== END VERIFIED FACTS ===");
+    sections.push("");
+
+    return sections.join("\n");
+  }
+
+  /**
+   * Creates prompt for generating movie/series suggestions
    */
   private createSuggestionPrompt(): string {
-    return `You are a world-renowned film curator and entertainment expert with access to global cinema knowledge. Your specialty is discovering hidden gems, underrated masterpieces, and cult classics that deserve more recognition.
+    return `You are a film curator recommending hidden gems and underrated titles.
 
-Generate a single exceptional movie OR TV series recommendation based on these criteria:
+Recommend one exceptional movie or TV series that deserves more recognition.
 
-🎯 TARGET AUDIENCE: Cinephiles who appreciate quality storytelling, unique cinematography, and cultural significance
-🌍 GLOBAL PERSPECTIVE: Include international films, indie productions, and overlooked gems from any era
-🎨 ARTISTIC VALUE: Prioritize films/series with exceptional direction, performances, or innovative techniques
-📚 CULT STATUS: Consider works with passionate fanbases, critical acclaim, or significant cultural impact
-🔍 HIDDEN GEMS: Focus on lesser-known titles that mainstream audiences might have missed
+Focus on:
+- Hidden gems and cult classics
+- International and independent films
+- Critically acclaimed but overlooked titles
 
-PREFERENCE WEIGHTS:
-- 40% Hidden gems and underrated titles
-- 25% International and foreign language content  
-- 20% Cult classics and critical darlings
-- 15% Innovative or groundbreaking works
-
-Return your recommendation in this EXACT JSON format:
+Return as JSON:
 {
-  "title": "Exact title of the movie/series",
-  "year": "Release year (for series, use first aired year)",
+  "title": "Exact title",
+  "year": "Release year",
   "type": "movie or series",
-  "overview": "2-3 sentence plot summary that captures the essence without spoilers",
-  "reason": "Compelling 2-3 sentence explanation of why this is worth watching today, focusing on its unique qualities and emotional impact",
-  "searchKeyword": "Most effective single search term to find this title (usually just the main title)"
+  "overview": "2-3 sentence plot summary",
+  "reason": "Why this is worth watching",
+  "searchKeyword": "Best search term"
 }
 
-IMPORTANT GUIDELINES:
-- Choose titles that are genuinely exceptional but may be overlooked
-- Avoid obvious mainstream blockbusters or extremely popular series
-- Focus on works with lasting impact and rewatchability
-- Ensure the title can realistically be found through search
-- Return ONLY the JSON object, no other text`;
+Return ONLY the JSON object, no other text.`;
   }
 
   /**
-   * Extracts facts from raw text using line-based parsing as fallback
-   * @param text Raw response text from AI
-   * @returns Array of extracted facts
+   * Parses JSON response with fallback
    */
-  private extractFactsFromText(text: string): string[] {
-    const lines = text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .map((line) =>
-        line
-          .replace(/^\d+\.\s*/, "")
-          .replace(/^[-*•]\s*/, "")
-          .trim()
-      )
-      .filter(
-        (fact) =>
-          fact.length > 20 && !fact.startsWith("{") && !fact.startsWith("[")
-      )
-      .slice(0, 10);
+  private parseFactsResponse(responseText: string): string[] {
+    const cleanedText = responseText
+      .replace(/^```json\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
 
-    return lines;
+    try {
+      const facts = JSON.parse(cleanedText);
+      if (Array.isArray(facts) && facts.length > 0) {
+        return facts
+          .filter((fact) => typeof fact === "string" && fact.trim().length > 10)
+          .slice(0, 10);
+      }
+    } catch {
+      // Fallback: extract from text
+      return responseText
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 20 && !line.startsWith("{") && !line.startsWith("["))
+        .map((line) => line.replace(/^\d+\.\s*/, "").replace(/^[-*•]\s*/, "").trim())
+        .slice(0, 10);
+    }
+
+    return [];
   }
 
   /**
-   * Creates a standardized empty suggestion error response
-   * @param error Error message to include in the response
-   * @returns AISuggestionResponse with empty suggestion and error details
+   * Parses suggestion response
    */
-  private createEmptySuggestionError(error: string): AISuggestionResponse {
+  private parseSuggestionResponse(responseText: string) {
+    const cleanedText = responseText
+      .replace(/^```json\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+
+    const suggestion = JSON.parse(cleanedText);
+
+    if (!suggestion?.title || !suggestion?.year || !suggestion?.type || 
+        !suggestion?.overview || !suggestion?.reason || !suggestion?.searchKeyword) {
+      throw new Error("Invalid suggestion format");
+    }
+
+    if (suggestion.type !== "movie" && suggestion.type !== "series") {
+      throw new Error("Invalid suggestion type");
+    }
+
     return {
-      suggestion: {
-        title: "",
-        year: "",
-        type: "movie",
-        overview: "",
-        reason: "",
-        searchKeyword: ""
-      },
-      success: false,
-      error: error,
+      title: suggestion.title.trim(),
+      year: suggestion.year.toString(),
+      type: suggestion.type,
+      overview: suggestion.overview.trim(),
+      reason: suggestion.reason.trim(),
+      searchKeyword: suggestion.searchKeyword.trim(),
     };
   }
 
   /**
-   * Creates a standardized empty facts error response
-   * @param error Error message to include in the response
-   * @returns AIFactsResponse with empty facts array and error details
+   * Handles API errors
    */
-  private createEmptyFactsError(error: string): AIFactsResponse {
-    return {
-      facts: [],
-      success: false,
-      error: error,
-    };
+  private handleError(error: Error): string {
+    const message = error.message.toLowerCase();
+
+    if (message.includes("api key") || message.includes("authentication")) {
+      return "AI service authentication failed. Please check configuration.";
+    }
+    if (message.includes("quota") || message.includes("rate limit")) {
+      return "AI service rate limit exceeded. Please try again later.";
+    }
+    if (message.includes("blocked") || message.includes("safety")) {
+      return "Content was blocked by safety filters. Please try again.";
+    }
+
+    return error.message;
   }
 
   /**
@@ -206,269 +244,161 @@ IMPORTANT GUIDELINES:
   async generateSuggestion(): Promise<AISuggestionResponse> {
     try {
       this.logger.info("Generating AI suggestion");
-      const prompt = this.createSuggestionPrompt();
 
       const response = await this.ai.models.generateContent({
         model: this.MODEL_NAME,
-        contents: prompt,
+        contents: this.createSuggestionPrompt(),
       });
 
-      // Check if response exists and has text
-      if (!response || !response.text) {
-        this.logger.error("Empty or invalid response from Gemini API", {
-          hasResponse: !!response,
-          responseKeys: response ? Object.keys(response) : []
-        });
+      if (!response?.text) {
         throw new Error("Empty response from Gemini API");
       }
 
-      const responseText = response.text.trim();
-      
-      if (responseText.length === 0) {
-        this.logger.error("Response text is empty");
-        throw new Error("Empty response text from Gemini API");
-      }
+      const suggestion = this.parseSuggestionResponse(response.text);
 
-      this.logger.debug("Received AI suggestion response", {
-        responseLength: responseText.length,
-        responsePreview: responseText.substring(0, 100)
+      this.logger.info("Successfully generated AI suggestion", {
+        title: suggestion.title,
+        type: suggestion.type,
       });
 
-      // Clean and parse the JSON response
-      const cleanedText = responseText
-        .replace(/^```json\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-
-      try {
-        const suggestion = JSON.parse(cleanedText);
-
-        // Validate the suggestion structure
-        if (
-          suggestion &&
-          typeof suggestion === 'object' &&
-          suggestion.title &&
-          suggestion.year &&
-          suggestion.type &&
-          suggestion.overview &&
-          suggestion.reason &&
-          suggestion.searchKeyword &&
-          (suggestion.type === 'movie' || suggestion.type === 'series')
-        ) {
-          this.logger.info("Successfully generated AI suggestion", {
-            title: suggestion.title,
-            type: suggestion.type
-          });
-          
-          return {
-            suggestion: {
-              title: suggestion.title.trim(),
-              year: suggestion.year.toString(),
-              type: suggestion.type,
-              overview: suggestion.overview.trim(),
-              reason: suggestion.reason.trim(),
-              searchKeyword: suggestion.searchKeyword.trim()
-            },
-            success: true,
-          };
-        }
-
-        this.logger.error("Invalid suggestion format received", {
-          hasTitle: !!suggestion?.title,
-          hasYear: !!suggestion?.year,
-          hasType: !!suggestion?.type,
-          type: suggestion?.type
-        });
-        throw new Error("Invalid suggestion format received from AI");
-      } catch (parseError) {
-        // Log the JSON parsing error with cleaned text for debugging
-        this.logger.error('JSON parsing failed for AI suggestion response', {
-          error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
-          cleanedTextPreview: cleanedText.substring(0, 200),
-          originalResponsePreview: responseText.substring(0, 200)
-        });
-
-        throw new Error("Failed to parse AI suggestion response");
-      }
+      return { suggestion, success: true };
     } catch (error) {
-      this.logger.error("Error generating AI suggestion", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        errorName: error instanceof Error ? error.name : "UnknownError"
-      });
+      const errorMessage = this.handleError(error as Error);
+      this.logger.error("Error generating AI suggestion", { error: errorMessage });
 
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-
-        if (errorMessage.includes("api key") || errorMessage.includes("authentication")) {
-          return this.createEmptySuggestionError("AI service authentication failed. Please check configuration.");
-        }
-
-        if (
-          errorMessage.includes("quota") ||
-          errorMessage.includes("rate limit")
-        ) {
-          return this.createEmptySuggestionError("AI service quota exceeded. Please try again later.");
-        }
-
-        if (
-          errorMessage.includes("not found") ||
-          errorMessage.includes("404")
-        ) {
-          return this.createEmptySuggestionError("AI model temporarily unavailable. Please try again later.");
-        }
-
-        if (errorMessage.includes("blocked") || errorMessage.includes("safety")) {
-          return this.createEmptySuggestionError("Content was blocked by safety filters. Please try again.");
-        }
-      }
-
-      return this.createEmptySuggestionError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
+      return {
+        suggestion: {
+          title: "",
+          year: "",
+          type: "movie",
+          overview: "",
+          reason: "",
+          searchKeyword: "",
+        },
+        success: false,
+        error: errorMessage,
+      };
     }
   }
-  async generateFacts(data: MovieData): Promise<AIFactsResponse> {
+
+  /**
+   * Generates AI-powered facts with optional web search verification
+   */
+  async generateFacts(data: MovieData, enableFactVerification: boolean = true): Promise<AIFactsResponse> {
     try {
-      const isTV = "name" in data;
-      const title = isTV ? data.name : data.title;
+      const title = data.name || data.title;
 
       if (!title) {
-        this.logger.error("Title is required for generating facts");
         throw new Error("Title is required");
       }
 
-      this.logger.info("Generating AI facts", { title, isTV });
-      const prompt = this.createMoviePrompt(data);
+      this.logger.info("Generating AI facts", { title, enableFactVerification });
+
+      // Attempt fact verification if enabled
+      if (enableFactVerification && !data.verified_facts) {
+        try {
+          const factVerificationService = getFactVerificationService();
+          const releaseYear = data.release_date 
+            ? new Date(data.release_date).getFullYear().toString()
+            : data.first_air_date 
+            ? new Date(data.first_air_date).getFullYear().toString()
+            : undefined;
+
+          const verifiedFacts = await factVerificationService.verifyFacts(title, releaseYear);
+          data.verified_facts = verifiedFacts;
+
+          this.logger.info("Fact verification completed", { 
+            title, 
+            confidence: verifiedFacts.search_confidence,
+            usedSerpApi: true,
+          });
+        } catch (verificationError) {
+          this.logger.warn("Fact verification failed, using pure Gemini mode", {
+            title,
+            error: verificationError instanceof Error ? verificationError.message : "Unknown error",
+          });
+          // Continue without verified facts - Gemini will generate based on its training data
+        }
+      }
+
+      // Use enhanced prompt if verification failed or was skipped
+      const prompt = !data.verified_facts && enableFactVerification 
+        ? this.createFallbackPrompt(data)
+        : this.createMoviePrompt(data);
 
       const response = await this.ai.models.generateContent({
         model: this.MODEL_NAME,
         contents: prompt,
       });
 
-      // Check if response exists and has text
-      if (!response || !response.text) {
-        this.logger.error("Empty or invalid response from Gemini API", {
-          hasResponse: !!response,
-          responseKeys: response ? Object.keys(response) : []
-        });
+      if (!response?.text) {
         throw new Error("Empty response from Gemini API");
       }
 
-      const responseText = response.text.trim();
-      
-      if (responseText.length === 0) {
-        this.logger.error("Response text is empty");
-        throw new Error("Empty response text from Gemini API");
+      const facts = this.parseFactsResponse(response.text);
+
+      if (facts.length === 0) {
+        throw new Error("No valid facts extracted from AI response");
       }
 
-      this.logger.debug("Received AI facts response", {
-        responseLength: responseText.length,
-        responsePreview: responseText.substring(0, 100)
+      this.logger.info("Successfully generated AI facts", {
+        title,
+        factsCount: facts.length,
+        withVerification: !!data.verified_facts,
+        mode: data.verified_facts ? "verified" : "pure-gemini",
       });
 
-      // Clean and parse the JSON response
-      const cleanedText = responseText
-        .replace(/^```json\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-
-      try {
-        const facts = JSON.parse(cleanedText);
-
-        if (Array.isArray(facts) && facts.length > 0) {
-          const validFacts = facts
-            .filter(
-              (fact) => typeof fact === "string" && fact.trim().length > 10
-            )
-            .slice(0, 10);
-
-          if (validFacts.length > 0) {
-            this.logger.info("Successfully generated AI facts", {
-              title,
-              factsCount: validFacts.length
-            });
-            
-            return {
-              facts: validFacts,
-              success: true,
-            };
-          }
-        }
-
-        this.logger.error("Invalid facts format received", {
-          isArray: Array.isArray(facts),
-          factsLength: Array.isArray(facts) ? facts.length : 0
-        });
-        throw new Error("Invalid facts format received from AI");
-      } catch (parseError) {
-        // Log the JSON parsing error with raw response for debugging
-        this.logger.error('JSON parsing failed for AI facts response', {
-          error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
-          cleanedTextPreview: cleanedText.substring(0, 200),
-          originalResponsePreview: responseText.substring(0, 200)
-        });
-
-        // Fallback: Extract facts using helper method
-        this.logger.info("Attempting fallback fact extraction");
-        const extractedFacts = this.extractFactsFromText(responseText);
-
-        if (extractedFacts.length > 0) {
-          this.logger.info("Successfully extracted facts using fallback method", {
-            factsCount: extractedFacts.length
-          });
-          
-          return {
-            facts: extractedFacts,
-            success: true,
-          };
-        }
-
-        throw new Error("Failed to extract facts from AI response");
-      }
+      return { facts, success: true };
     } catch (error) {
-      this.logger.error("Error generating AI facts", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        errorName: error instanceof Error ? error.name : "UnknownError"
-      });
+      const errorMessage = this.handleError(error as Error);
+      this.logger.error("Error generating AI facts", { error: errorMessage });
 
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-
-        if (errorMessage.includes("api key") || errorMessage.includes("authentication")) {
-          return this.createEmptyFactsError(
-            "AI service authentication failed. Please check configuration."
-          );
-        }
-
-        if (
-          errorMessage.includes("quota") ||
-          errorMessage.includes("rate limit")
-        ) {
-          return this.createEmptyFactsError("AI service quota exceeded. Please try again later.");
-        }
-
-        if (
-          errorMessage.includes("not found") ||
-          errorMessage.includes("404")
-        ) {
-          return this.createEmptyFactsError("AI model temporarily unavailable. Please try again later.");
-        }
-
-        if (errorMessage.includes("blocked") || errorMessage.includes("safety")) {
-          return this.createEmptyFactsError(
-            "Content was blocked by safety filters. Please try a different title."
-          );
-        }
-      }
-
-      return this.createEmptyFactsError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
+      return {
+        facts: [],
+        success: false,
+        error: errorMessage,
+      };
     }
+  }
+
+  /**
+   * Creates fallback prompt for pure Gemini mode (when SerpApi fails)
+   */
+  private createFallbackPrompt(data: MovieData): string {
+    const isTV = !!data.name;
+    const title = isTV ? data.name : data.title;
+    const releaseYear = isTV
+      ? data.first_air_date ? new Date(data.first_air_date).getFullYear() : "Unknown"
+      : data.release_date ? new Date(data.release_date).getFullYear() : "Unknown";
+
+    return `You are an expert cinematic researcher with deep knowledge of movies and TV shows.
+
+GOAL: Generate Top 10 most exciting and factual information about "${title}" (${releaseYear}) - a ${isTV ? "TV Series" : "Movie"}.
+
+IMPORTANT: Use only your training data knowledge. Focus on well-known, verifiable facts that would be commonly reported.
+
+Basic Info:
+- Overview: ${data.overview || "Not available"}
+- Language: ${data.original_language || "en"}
+- Genres: ${data.genres?.map(g => g.name).join(", ") || "various"}
+- Runtime: ${data.runtime ? `${data.runtime} minutes` : "not specified"}
+${data.production_companies?.length ? `- Producers: ${data.production_companies.map(pc => pc.name).join(", ")}` : ""}
+${isTV && data.created_by?.length ? `- Creators: ${data.created_by.map(c => c.name).join(", ")}` : ""}
+${isTV && data.networks?.length ? `- Networks: ${data.networks.map(n => n.name).join(", ")}` : ""}
+${isTV && data.number_of_seasons ? `- Seasons: ${data.number_of_seasons}, Episodes: ${data.number_of_episodes}` : ""}
+
+Requirements:
+1. Focus on widely-known, well-documented facts from your training data
+2. Include cast information, production details, reception, and notable achievements
+3. Avoid speculation or uncertain information
+4. Format as compelling, single-paragraph facts
+5. Cover performance, critical reception, cultural impact, and notable trivia
+6. Make each fact attention-grabbing and informative
+
+Return exactly 10 facts as JSON array:
+["Well-documented fact 1", "Well-documented fact 2", ...]
+
+Return ONLY the JSON array, no other text.`;
   }
 }
 
@@ -482,30 +412,15 @@ export function getGeminiService(): GeminiService {
   if (!geminiServiceInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey || apiKey.trim().length === 0) {
+    if (!apiKey?.trim()) {
       const logger = getLogger();
-      logger.error("GEMINI_API_KEY environment variable is not configured or empty");
+      logger.error("GEMINI_API_KEY environment variable is not configured");
       throw new Error("GEMINI_API_KEY environment variable is not configured");
     }
-    
-    try {
-      geminiServiceInstance = new GeminiService(apiKey);
-    } catch (error) {
-      const logger = getLogger();
-      logger.error("Failed to initialize GeminiService", {
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-      throw error;
-    }
+
+    geminiServiceInstance = new GeminiService(apiKey);
   }
   return geminiServiceInstance;
-}
-
-/**
- * Reset the Gemini service instance (useful for testing or reinitialization)
- */
-export function resetGeminiService(): void {
-  geminiServiceInstance = null;
 }
 
 export type { MovieData, AIFactsResponse, AISuggestionResponse };

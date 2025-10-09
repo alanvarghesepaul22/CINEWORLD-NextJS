@@ -147,12 +147,7 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ id }) => {
           {/* Did You Know Section - Full Width */}
           <DidYouKnowSection
             title={title}
-            movieData={{
-              title: title,
-              release_date: MovieDetail.release_date,
-              overview: MovieDetail.overview,
-              vote_average: MovieDetail.vote_average,
-            }}
+            movieData={MovieDetail}
           />
         </div>
       </div>

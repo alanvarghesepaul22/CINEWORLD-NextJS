@@ -46,16 +46,13 @@ const getHeaders = () => ({
 });
 
 // Request deduplication cache to prevent duplicate simultaneous requests
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pendingRequests = new Map<string, Promise<any>>();
+const pendingRequests = new Map<string, Promise<unknown>>();
 
 // Simple fetch wrapper with single call and proper error handling
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function fetchAPI(
+export async function fetchAPI<T = unknown>(
   url: string,
   options: RequestInit = {}
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<T> {
   // Modify URL to include API key if using legacy authentication
   let requestUrl = url;
   if (!ACCESS_TOKEN && API_KEY) {
@@ -65,7 +62,7 @@ export async function fetchAPI(
   // Request deduplication - if same request is in flight, return the pending promise
   const cacheKey = `${requestUrl}:${JSON.stringify(options)}`;
   if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey)!;
+    return pendingRequests.get(cacheKey)! as Promise<T>;
   }
 
   const requestPromise = (async () => {
@@ -126,7 +123,7 @@ export async function fetchAPI(
       const error_ = error as Error & { code?: string; status?: number };
       
       // Handle network errors (fetch failed, timeout, etc.)
-      if (!error_.status) {
+      if (!error_.status && !error_.code) {
         const networkError = new Error('Network error or API unavailable') as Error & { 
           status: number;
           code: string;
@@ -169,7 +166,7 @@ async function getDetails(
   }
   
   try {
-    return await fetchAPI(`${BASE_URL}/${mediaType}/${id}`, {
+    return await fetchAPI<TMDBMovieDetail | TMDBTVDetail>(`${BASE_URL}/${mediaType}/${id}`, {
       headers: getHeaders(),
     });
   } catch (error) {
@@ -202,7 +199,7 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/trending/${mediaType}/${timeWindow}?${searchParams}`,
       {
         headers: getHeaders(),
@@ -219,7 +216,7 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/${mediaType}/popular?${searchParams}`,
       {
         headers: getHeaders(),
@@ -236,7 +233,7 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/${mediaType}/top_rated?${searchParams}`,
       {
         headers: getHeaders(),
@@ -254,7 +251,7 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/${mediaType}/${endpoint}?${searchParams}`,
       {
         headers: getHeaders(),
@@ -272,7 +269,7 @@ export const api = {
     const searchParams = new URLSearchParams({
       page: page.toString(),
     });
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/${mediaType}/${endpoint}?${searchParams}`,
       {
         headers: getHeaders(),
@@ -283,7 +280,7 @@ export const api = {
   // Genres
   async getGenres(): Promise<TMDBGenresResponse> {
     checkAccessToken();
-    return await fetchAPI(`${BASE_URL}/genre/movie/list`, {
+    return await fetchAPI<TMDBGenresResponse>(`${BASE_URL}/genre/movie/list`, {
       headers: getHeaders(),
     });
   },
@@ -312,7 +309,7 @@ export const api = {
       }),
     });
 
-    return await fetchAPI(
+    return await fetchAPI<TMDBTrendingResponse>(
       `${BASE_URL}/discover/${mediaType}?${searchParams}`,
       {
         headers: getHeaders(),
@@ -332,7 +329,7 @@ export const api = {
       page: page.toString(),
     });
 
-    return await fetchAPI(`${BASE_URL}/search/multi?${searchParams}`, {
+    return await fetchAPI<TMDBSearchResponse>(`${BASE_URL}/search/multi?${searchParams}`, {
       headers: getHeaders(),
     });
   },
@@ -357,7 +354,7 @@ export const api = {
     }
     
     try {
-      const result = await fetchAPI(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`, {
+      const result = await fetchAPI<TMDBSeasonDetail>(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`, {
         headers: getHeaders(),
       });
       return result;
@@ -402,7 +399,7 @@ export const api = {
     }
     
     try {
-      const result = await fetchAPI(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`, {
+      const result = await fetchAPI<TMDBEpisodeDetail>(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`, {
         headers: getHeaders(),
       });
       return result;
@@ -464,7 +461,7 @@ export const api = {
       }
       
       const searchParams = new URLSearchParams(params);
-      const data = await fetchAPI(
+      const data = await fetchAPI<T extends "movie" ? TMDBMovieResponse : TMDBTVResponse>(
         `${BASE_URL}/discover/${mediaType}?${searchParams}`,
         { headers: getHeaders() }
       );
@@ -505,7 +502,7 @@ export const api = {
         endpoint = `${BASE_URL}/${mediaType}/popular`;
     }
 
-    const data = await fetchAPI(
+    const data = await fetchAPI<T extends "movie" ? TMDBMovieResponse : TMDBTVResponse>(
       `${endpoint}?${searchParams}`,
       { headers: getHeaders() }
     );
@@ -517,7 +514,7 @@ export const api = {
     const startTime = Date.now();
     try {
       checkAccessToken();
-      await fetchAPI(`${BASE_URL}/configuration`, {
+      await fetchAPI<unknown>(`${BASE_URL}/configuration`, {
         headers: getHeaders(),
       });
       const latency = Date.now() - startTime;
