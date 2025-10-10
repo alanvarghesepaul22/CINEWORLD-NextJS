@@ -19,7 +19,7 @@ const SeasonCard = ({ SeasonDetails, SeriesId }: SeasonCardProps) => {
   return (
     <div className="flex flex-col items-center ">
       <div className="w-56 h-80 sm:w-52 sm:h-72 bg-grey m-3 hover:opacity-75 shadow-md">
-        <Link href="/series/[id]/season/[seasonid]" as={`/series/${SeriesId}/season/${SeasonDetails.season_number}`} title={SeasonDetails.name}>
+        <Link href={`/series/${SeriesId}/season/${SeasonDetails.season_number}`} title={SeasonDetails.name}>
           <Image
             src={poster_path}
             alt={`${SeasonDetails.name} season poster`}

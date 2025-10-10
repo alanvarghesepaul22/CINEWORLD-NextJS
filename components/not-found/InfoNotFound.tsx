@@ -29,9 +29,9 @@ const InfoNotFound = ({ type = "movie" }: InfoNotFoundProps) => {
           >
             Go Back
           </Button>
-          <Link href="/movie">
+          <Link href={type === "movie" ? "/movie" : "/tv"}>
             <Button className="px-6 py-3 border border-gray-600 text-white font-medium rounded-lg bg-gray-400/20 hover:bg-gray-600/20 transition-colors">
-              Browse Movies
+              Browse {type === "movie" ? "Movies" : "TV Shows"}
             </Button>
           </Link>
         </div>

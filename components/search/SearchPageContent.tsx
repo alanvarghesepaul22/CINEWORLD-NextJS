@@ -10,6 +10,8 @@ import { api } from "@/lib/api";
 import { PageLoading } from "../loading/PageLoading";
 
 type ContentSource = "search" | "filter" | "none";
+const MIN_SEARCH_LENGTH = 3;
+const SEARCH_DEBOUNCE_MS = 1000;
 
 interface AsyncResultsSectionProps {
   isLoading: boolean;
@@ -101,7 +103,7 @@ const SearchPageContent = () => {
   >([]);
 
   // Debounced search value
-  const [debouncedSearchValue] = useDebounce(typedValue, 1000);
+  const [debouncedSearchValue] = useDebounce(typedValue, SEARCH_DEBOUNCE_MS);
 
   /**
    * Initialize search from URL parameters
@@ -136,7 +138,7 @@ const SearchPageContent = () => {
   useEffect(() => {
     const performSearch = async () => {
       // Require minimum 3 characters before making API call
-      if (debouncedSearchValue.trim().length < 3) {
+      if (debouncedSearchValue.trim().length < MIN_SEARCH_LENGTH) {
         setSearchResults([]);
         setSearchError(null);
         setActiveSource((prev) => (prev === "search" ? "none" : prev));
@@ -176,7 +178,7 @@ const SearchPageContent = () => {
   const handleSearchInput = (value: string) => {
     setTypedValue(value);
     // Only update URL if search query has 3+ characters or is empty (for clearing)
-    if (value.trim().length >= 3 || value.trim().length === 0) {
+    if (value.trim().length >= MIN_SEARCH_LENGTH || value.trim().length === 0) {
       updateSearchURL(value);
     }
   };

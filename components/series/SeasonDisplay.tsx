@@ -22,7 +22,7 @@ const SeasonDisplay = ({ SeasonCards, TvDetails }: SeasonDisplayProps) => {
         {SeasonCards?.map((season) => {
           return (
             <SeasonCard
-              key={season.id || season.season_number}
+              key={season.id ?? season.season_number}
               SeasonDetails={season}
               SeriesId={TvDetails.id}
             />

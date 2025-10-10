@@ -3,9 +3,9 @@ import SeasonNotFound from "@/components/not-found/SeasonNotFound";
 import SeasonInfo from "@/components/series/SeasonInfo";
 
 export const metadata: Metadata = {
-  title: "Series | Cineworld",
+  title: "Season Details | Cineworld",
   description:
-    "Browse all series available on Cineworld. Find trending, top-rated, and new releases.",
+    "View detailed information about TV show seasons including episodes, cast, and ratings.",
 };
 interface SeasonsDetailsPageProps {
   params: Promise<{

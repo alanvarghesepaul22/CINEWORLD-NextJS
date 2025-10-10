@@ -31,7 +31,7 @@ const SeasonNotFound = ({ seasonId }: SeasonNotFoundProps) => {
           Could not find season {seasonId} for this series.
         </p>
         <p className="text-xs text-gray-500 mb-4">
-          Please check the URL or try again later. It can also be server issue
+          Please check the URL or try again later. It can also be a server issue
           sometimes
         </p>
         <RefreshButton className="px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors duration-200">

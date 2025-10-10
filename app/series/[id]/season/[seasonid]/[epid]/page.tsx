@@ -5,7 +5,7 @@ import EpisodeInfo from "@/components/series/EpisodeInfo";
 export const metadata: Metadata = {
   title: "Episode | Cineworld",
   description:
-    "Browse all series available on Cineworld. Find trending, top-rated, and new releases.",
+    "Watch and explore episode details, cast, crew, and more on Cineworld.",
 };
 
 interface EpisodeDetailsPageProps {

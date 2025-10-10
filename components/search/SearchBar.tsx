@@ -99,6 +99,7 @@ const SearchBar = ({
             name="search"
             id="search"
             placeholder="Search for movies, TV shows, actors.."
+            aria-label="Search for movies, TV shows, actors"
             className="flex-1 bg-transparent text-white placeholder-gray-400 py-3 placeholder:text-xs pr-3 text-base outline-none font-medium"
             onChange={handleTyping}
             onKeyDown={handleKeyDown}

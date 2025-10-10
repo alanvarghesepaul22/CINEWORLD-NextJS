@@ -53,7 +53,7 @@ const MediaPlayer = ({
               src={embedUrl}
               title={`${title} - Video Player`}
               className="absolute inset-0 w-full h-full border-0 rounded-xl"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
               allowFullScreen
               loading="lazy"
             />

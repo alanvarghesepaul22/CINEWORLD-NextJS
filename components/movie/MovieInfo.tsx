@@ -37,6 +37,8 @@ const MovieInfo = ({ id }: MovieInfoProps) => {
         !/^\d+$/.test(id?.toString().trim() || "")
       ) {
         console.error("[MovieDetail] Invalid movie ID format:", id);
+        setNotFound(true);
+        setMovieData(null);
         setIsLoading(false);
         return;
       }

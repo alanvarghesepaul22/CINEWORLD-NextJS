@@ -53,10 +53,10 @@ const TvDetails = ({
         </div>
       </div>
       <div className="flex flex-wrap justify-center sm:justify-start w-fit my-3 space-x-3 text-sm sm:text-base">
-        {genreArr.map((item, index) => {
+        {genreArr.map((item) => {
           return (
             <p
-              key={index}
+              key={item}
               className="text-light-primary border border-light-primary px-3 rounded-full w-fit  my-1"
             >
               {item}
