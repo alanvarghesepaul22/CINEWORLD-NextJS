@@ -7,11 +7,11 @@ interface EpisodeNotFoundProps {
   episodeId: string;
 }
 
-export default function EpisodeNotFound({
+const EpisodeNotFound = ({
   seriesId,
   seasonId,
   episodeId,
-}: EpisodeNotFoundProps) {
+}: EpisodeNotFoundProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
       <div className="glass-container text-center max-w-lg">
@@ -42,4 +42,5 @@ export default function EpisodeNotFound({
       </div>
     </div>
   );
-}
+};
+export default EpisodeNotFound;

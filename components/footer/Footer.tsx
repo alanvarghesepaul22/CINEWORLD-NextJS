@@ -4,7 +4,7 @@ import { AiFillGithub } from "react-icons/ai";
 import { Heart } from "lucide-react";
 import Logo from "../navbar/Logo";
 
-const Footer: React.FC = () => {
+const Footer = () => {
   return (
     <footer className="w-full bg-black/80 backdrop-blur-md border-t border-gray-800/50 shadow-2xl shadow-black/20 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -15,11 +15,11 @@ interface DidYouKnowSectionProps {
  * DidYouKnowSection - AI-powered facts section with Gemini integration
  * Provides fascinating behind-the-scenes insights and trivia
  */
-const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
+const DidYouKnowSection = ({
   title,
   movieData,
   className = "",
-}) => {
+}: DidYouKnowSectionProps) => {
   const [facts, setFacts] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,15 +29,17 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
    * Transform TMDB data to format expected by geminiService
    */
   const transformToGeminiFormat = (data: TMDBMovieDetail | TMDBTVDetail) => {
-    const isTV = 'name' in data;
-    
+    const isTV = "name" in data;
+
     const baseData = {
       id: data.id,
       overview: data.overview,
       vote_average: data.vote_average,
       original_language: data.original_language,
       genres: data.genres,
-      production_companies: data.production_companies?.map(pc => ({ name: pc.name })),
+      production_companies: data.production_companies?.map((pc) => ({
+        name: pc.name,
+      })),
     };
 
     if (isTV) {
@@ -50,7 +52,7 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
         episode_run_time: tvData.episode_run_time,
         number_of_seasons: tvData.number_of_seasons,
         number_of_episodes: tvData.number_of_episodes,
-        networks: tvData.networks?.map(n => ({ name: n.name })),
+        networks: tvData.networks?.map((n) => ({ name: n.name })),
       };
     } else {
       const movieData = data as TMDBMovieDetail;
@@ -78,11 +80,11 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
     try {
       // Transform the full TMDB object to the format expected by geminiService
       const transformedData = transformToGeminiFormat(movieData);
-      
-      const response = await fetch('/api/ai-facts', {
-        method: 'POST',
+
+      const response = await fetch("/api/ai-facts", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(transformedData),
       });
@@ -93,17 +95,22 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
         throw new Error(data.error || `HTTP ${response.status}`);
       }
 
-      if (data.success && data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
+      if (
+        data.success &&
+        data.facts &&
+        Array.isArray(data.facts) &&
+        data.facts.length > 0
+      ) {
         setFacts(data.facts);
         setHasGenerated(true);
       } else {
-        throw new Error('No facts received from AI');
+        throw new Error("No facts received from AI");
       }
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      console.error('❌ Failed to generate AI facts:', err);
+      console.error("❌ Failed to generate AI facts:", err);
     } finally {
       setIsLoading(false);
     }
@@ -131,11 +138,13 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
               Did You Know?
             </h3>
           </div>
-          
+
           {/* AI Badge */}
           <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full border border-blue-400/30">
             <Sparkles className="w-3 h-3 text-blue-400" />
-            <span className="text-xs text-blue-400 font-medium">AI Powered</span>
+            <span className="text-xs text-blue-400 font-medium">
+              AI Powered
+            </span>
           </div>
         </div>
 
@@ -152,9 +161,10 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
               Discover Amazing Facts
             </h4>
             <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-              Get exclusive behind-the-scenes insights, production secrets, cast stories, 
-              and fascinating trivia about{" "}
-              <span className="text-primary font-medium">{title}</span> powered by AI.
+              Get exclusive behind-the-scenes insights, production secrets, cast
+              stories, and fascinating trivia about{" "}
+              <span className="text-primary font-medium">{title}</span> powered
+              by AI.
             </p>
             <Button
               onClick={generateFacts}
@@ -175,7 +185,9 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
           <div className="space-y-4 py-4">
             <div className="flex items-center justify-center gap-3 mb-4">
               <RefreshCw className="w-5 h-5 text-primary animate-spin" />
-              <span className="text-primary font-medium">Generating fascinating facts...</span>
+              <span className="text-primary font-medium">
+                Generating fascinating facts...
+              </span>
             </div>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -195,8 +207,10 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
           // Error state
           <div className="text-center py-6 space-y-4">
             <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
-            <div>
-              <h4 className="text-red-400 font-medium mb-2">Failed to Generate Facts</h4>
+            <>
+              <h4 className="text-red-400 font-medium mb-2">
+                Failed to Generate Facts
+              </h4>
               <p className="text-gray-400 text-sm mb-4">{error}</p>
               <div className="flex justify-center gap-3">
                 <Button
@@ -217,7 +231,7 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
                   Reset
                 </Button>
               </div>
-            </div>
+            </>
           </div>
         ) : (
           // Success state - Display facts
@@ -232,7 +246,7 @@ const DidYouKnowSection: React.FC<DidYouKnowSectionProps> = ({
                 </li>
               ))}
             </ul>
-            
+
             {/* Action buttons */}
             <div className="flex justify-center gap-3 pt-4 border-t border-gray-700/50">
               <Button

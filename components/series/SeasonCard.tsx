@@ -11,7 +11,7 @@ interface SeasonCardProps {
   SeriesId: string | number;
 }
 
-const SeasonCard: React.FC<SeasonCardProps> = ({ SeasonDetails, SeriesId }) => {
+const SeasonCard = ({ SeasonDetails, SeriesId }: SeasonCardProps) => {
   let poster_path = `https://image.tmdb.org/t/p/w342/${SeasonDetails.poster_path}`;
   if (SeasonDetails.poster_path === null) {
     poster_path = "https://i.imgur.com/wjVuAGb.png";

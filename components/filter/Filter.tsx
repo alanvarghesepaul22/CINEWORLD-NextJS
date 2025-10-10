@@ -32,14 +32,14 @@ interface FilterProps {
  * @param includeReset - Whether to show reset/all option (default: true)
  * @param resetLabel - Label for reset option (default: "All")
  */
-const Filter: React.FC<FilterProps> = ({
+const Filter = ({
   label,
   options,
   value,
   onChange,
   includeReset = true,
   resetLabel = "All",
-}) => {
+}: FilterProps) => {
   const selectId = useId();
   
   // Handle value changes and convert reset value to empty string

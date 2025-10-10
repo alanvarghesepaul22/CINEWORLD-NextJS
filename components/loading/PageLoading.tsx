@@ -1,6 +1,10 @@
 import React, { ReactNode } from "react";
 
-export default function PageLoading({ children }: { children?: ReactNode }) {
+interface LoadingProps {
+  children?: ReactNode;
+}
+
+const PageLoading = ({ children }: LoadingProps) => {
   return (
     <div className="flex justify-center items-center py-16">
       <div className="flex items-center gap-3 text-gray-400">
@@ -9,18 +13,18 @@ export default function PageLoading({ children }: { children?: ReactNode }) {
       </div>
     </div>
   );
-}
+};
 
-export function PageEmpty({ children }: { children?: ReactNode }) {
+const PageEmpty = ({ children }: LoadingProps) => {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="text-gray-400 text-lg mb-2">{children}</div>
       <div className="text-gray-500 text-sm">Try adjusting your filters</div>
     </div>
   );
-}
+};
 
-export function InfoLoading({ children }: { children?: ReactNode }) {
+const InfoLoading = ({ children }: LoadingProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 pt-16">
       <div className="text-center">
@@ -30,4 +34,6 @@ export function InfoLoading({ children }: { children?: ReactNode }) {
       </div>
     </div>
   );
-}
+};
+
+export { PageLoading, PageEmpty, InfoLoading };

@@ -1,23 +1,22 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 import { api } from "@/lib/api";
-import { useWatchlist } from "@/lib/useWatchlist";
+import WatchlistButton from "@/components/watchlist/WatchlistButton";
 import { Button } from "@/components/ui/button";
-import { Play, Plus, Check, Pause, PlayIcon } from "lucide-react";
+import { Play, Pause, PlayIcon } from "lucide-react";
+import { PageLoading } from "../loading/PageLoading";
 
-export default function Hero() {
+const Hero = () => {
   const [slides, setSlides] = useState<(TMDBMovie | TMDBTVShow)[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [announceText, setAnnounceText] = useState("");
   const router = useRouter();
-  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
 
   // Fetch hero slides data
   useEffect(() => {
@@ -132,11 +131,7 @@ export default function Hero() {
 
   // Early return after all hooks are called
   if (loading) {
-    return (
-      <div className="relative h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <PageLoading>Wait a moment...</PageLoading>;
   }
 
   if (!slides || slides.length === 0) {
@@ -165,22 +160,6 @@ export default function Hero() {
       console.error("Navigation failed:", error);
     }
   }
-  function handleWatchlistToggle(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    event.preventDefault();
-    const mediaType = isTV ? "tv" : "movie";
-    if (isInWatchlist(currentSlide.id, mediaType)) {
-      removeFromWatchlist(currentSlide.id, mediaType);
-    } else {
-      addToWatchlist(currentSlide);
-    }
-  }
-
-  const isInWatchlistState = isInWatchlist(
-    currentSlide.id,
-    isTV ? "tv" : "movie"
-  );
 
   // Handle mouse interactions for accessibility
   const handleMouseEnter = () => {
@@ -322,34 +301,7 @@ export default function Hero() {
               Play
             </Button>
 
-            <Button
-              size="default"
-              variant="ghost"
-              className={`px-6 py-2 transition-all duration-200 ${
-                isInWatchlistState
-                  ? "text-theme-primary bg-theme-primary/10 hover:bg-theme-primary/20 border border-theme-primary/30"
-                  : "text-white hover:bg-white/20 hover:text-black"
-              }`}
-              onClick={handleWatchlistToggle}
-              aria-pressed={isInWatchlistState}
-              aria-label={
-                isInWatchlistState
-                  ? "Remove from watchlist"
-                  : "Add to watchlist"
-              }
-            >
-              {isInWatchlistState ? (
-                <>
-                  <Check className="mr-2 h-4 w-4" />
-                  In Watchlist
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Watchlist
-                </>
-              )}
-            </Button>
+            <WatchlistButton media={currentSlide} variant="hero" />
           </motion.div>
         </motion.div>
       </div>
@@ -404,4 +356,6 @@ export default function Hero() {
       </div>
     </div>
   );
-}
+};
+
+export default Hero;

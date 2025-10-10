@@ -4,9 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
-import { useWatchlist } from "@/lib/useWatchlist";
-import { Button } from "@/components/ui/button";
-import { Plus, Check } from "lucide-react";
+import WatchlistButton from "@/components/watchlist/WatchlistButton";
 
 // Type guard function using a reliable discriminant
 function isTVShow(item: TMDBMovie | TMDBTVShow): item is TMDBTVShow {
@@ -24,18 +22,13 @@ const MediaCard: React.FC<MediaCardProps> = ({
   variant = "grid",
   className = "",
 }) => {
-  const { addToWatchlist, isInWatchlist, removeFromWatchlist } = useWatchlist();
-
   const isTV = isTVShow(media);
   const href = isTV ? `/series/${media.id}` : `/movie/${media.id}`;
   const titleVal = isTV ? media.name : media.title;
-  const mediaType = isTV ? 'tv' : 'movie';
 
   const poster_path = media.poster_path
     ? `https://image.tmdb.org/t/p/w342/${media.poster_path}`
     : "https://i.imgur.com/wjVuAGb.png";
-
-  const inWatchlist = isInWatchlist(media.id, mediaType);
 
   // Dynamic classes based on variant
   const getCardClasses = () => {
@@ -53,38 +46,11 @@ const MediaCard: React.FC<MediaCardProps> = ({
     }
   };
 
-  // Simple toggle button for watchlist - Hero section style
+  // Watchlist button for overlay
   const renderActionButtons = () => {
     return (
       <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-30">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (inWatchlist) {
-              // Pass type to ensure correct item is removed
-              removeFromWatchlist(media.id, mediaType);
-            } else {
-              addToWatchlist(media);
-            }
-          }}
-          className={`p-2 h-9 w-9 rounded-xl smooth-transition ${
-            inWatchlist
-              ? "text-theme-primary bg-theme-primary/10 hover:bg-theme-primary/20 border border-theme-primary/30 backdrop-blur-md"
-              : "text-white hover:bg-white/20 backdrop-blur-md border border-white/30"
-          }`}
-          aria-label={
-            inWatchlist ? "Remove from watchlist" : "Add to watchlist"
-          }
-        >
-          {inWatchlist ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-        </Button>
+        <WatchlistButton media={media} variant="compact" />
       </div>
     );
   };

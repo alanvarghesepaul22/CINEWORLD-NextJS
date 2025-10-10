@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import InfoNotFound from "@/components/not-found/InfoNotFound";
-import MovieInfo from "@/components/info/MovieInfo";
+import MovieInfo from "@/components/movie/MovieInfo";
 
 export const metadata: Metadata = {
   title: "Movie | Cineworld",

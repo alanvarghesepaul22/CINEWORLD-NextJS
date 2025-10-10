@@ -1,10 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import MediaPoster from "../display/MediaPoster";
-import MediaMeta from "./MediaMeta";
+import MediaMeta from "../info/MediaMeta";
 import MediaPlayer from "../display/MediaPlayer";
-import DidYouKnowSection from "./DidYouKnowSection";
-import { useResume } from "@/lib/useResume";
+import DidYouKnowSection from "../info/DidYouKnowSection";
 import { Genre, TMDBMovieDetail } from "@/lib/types";
 import { api } from "@/lib/api";
 import { InfoLoading } from "../loading/PageLoading";
@@ -21,11 +20,10 @@ interface MovieInfoProps {
   id: number;
 }
 
-const MovieInfo: React.FC<MovieInfoProps> = ({ id }) => {
+const MovieInfo = ({ id }: MovieInfoProps) => {
   const [movieData, setMovieData] = useState<MovieData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const { getProgress, markAsWatched, startOver, isWatched } = useResume();
 
   useEffect(() => {
     let isMounted = true;
@@ -84,14 +82,32 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ id }) => {
     };
   }, [id]);
 
-  const progress = getProgress(movieData?.id, "movie");
-  const watched = isWatched(movieData?.id, "movie");
   const MovieDetail = movieData?.data;
   const title =
     MovieDetail?.title || MovieDetail?.original_title || "Unknown Title";
   const releaseYear = MovieDetail?.release_date
     ? MovieDetail.release_date.slice(0, 4)
     : undefined;
+
+  // Convert MovieDetail to TMDBMovie format for WatchlistButton
+  const mediaForWatchlist = MovieDetail
+    ? {
+        id: MovieDetail.id,
+        title: MovieDetail.title,
+        overview: MovieDetail.overview,
+        poster_path: MovieDetail.poster_path,
+        backdrop_path: MovieDetail.backdrop_path,
+        release_date: MovieDetail.release_date,
+        vote_average: MovieDetail.vote_average,
+        vote_count: MovieDetail.vote_count,
+        popularity: MovieDetail.popularity,
+        genre_ids: MovieDetail.genres?.map((g) => g.id) || [],
+        adult: MovieDetail.adult,
+        original_language: MovieDetail.original_language,
+        original_title: MovieDetail.original_title,
+        video: false,
+      }
+    : null;
 
   // Not Found State
   if (notFound) {
@@ -128,13 +144,7 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ id }) => {
               runtime={MovieDetail.runtime}
               genres={movieData.genreArr}
               overview={MovieDetail.overview}
-              watchControls={{
-                isWatched: watched,
-                hasProgress: progress > 0,
-                onMarkWatched: () =>
-                  markAsWatched(Number(MovieDetail.id), "movie"),
-                onStartOver: () => startOver(Number(MovieDetail.id), "movie"),
-              }}
+              media={mediaForWatchlist!}
             />
           </div>
         </div>
@@ -145,10 +155,7 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ id }) => {
         {/* Controls and Additional Info Grid */}
         <div className="max-w-6xl mx-auto">
           {/* Did You Know Section - Full Width */}
-          <DidYouKnowSection
-            title={title}
-            movieData={MovieDetail}
-          />
+          <DidYouKnowSection title={title} movieData={MovieDetail} />
         </div>
       </div>
     </MediaDetailLayout>

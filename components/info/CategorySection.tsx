@@ -21,12 +21,12 @@ interface CategorySectionProps {
   seeAllHref: string;
 }
 
-export default function CategorySection({
+const CategorySection = ({
   title,
   mediaType,
   category,
   seeAllHref,
-}: CategorySectionProps) {
+}: CategorySectionProps) => {
   const page = 1;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +64,7 @@ export default function CategorySection({
   if (isLoading) {
     return (
       <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">{title}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
         <div className="flex space-x-3 sm:space-x-4 overflow-x-auto pb-4 scrollbar-hide horizontal-scroll pl-4 sm:pl-0">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="flex-shrink-0">
@@ -165,4 +165,5 @@ export default function CategorySection({
       )}
     </div>
   );
-}
+};
+export default CategorySection;

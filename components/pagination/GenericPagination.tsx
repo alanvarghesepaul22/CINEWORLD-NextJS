@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Pagination,
   PaginationContent,
@@ -17,13 +16,13 @@ interface GenericPaginationProps {
   queryParams?: URLSearchParams; // Additional query parameters to preserve
 }
 
-const GenericPagination: React.FC<GenericPaginationProps> = ({
+const GenericPagination = ({
   currentPage,
   baseUrl,
   maxPage = 500,
   visiblePages = 5, // Reduced for cleaner mobile experience
   queryParams,
-}) => {
+}: GenericPaginationProps) => {
   // Normalize current page to number
   const normalizedCurrentPage = isNaN(Number(currentPage))
     ? 1

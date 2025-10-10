@@ -6,11 +6,9 @@ import {
   Users,
   Tv,
   Film,
-  Play,
-  RotateCcw,
-  Check,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import WatchlistButton from "@/components/watchlist/WatchlistButton";
+import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 
 interface MediaMetaProps {
   type: "movie" | "tv";
@@ -24,20 +22,15 @@ interface MediaMetaProps {
   genres: string[];
   overview?: string;
   className?: string;
-  // Watch controls props
-  watchControls?: {
-    isWatched: boolean;
-    hasProgress: boolean;
-    onMarkWatched: () => void;
-    onStartOver: () => void;
-  };
+  // Media data for watchlist functionality
+  media: TMDBMovie | TMDBTVShow;
 }
 
 /**
  * MediaMeta - Modern metadata component for movies and TV shows
  * Features responsive design with beautiful icons and glass morphism
  */
-const MediaMeta: React.FC<MediaMetaProps> = ({
+const MediaMeta= ({
   type,
   title,
   year,
@@ -48,77 +41,15 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
   episodes,
   genres,
   overview,
-  watchControls,
+  media,
   className = "",
-}) => {
+}: MediaMetaProps) => {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header Section */}
       <div className="glass-container space-y-4 relative">
-        {/* Watch Controls - Top Right Corner */}
-        {watchControls && (
-          <div className="absolute top-4 right-4 z-10">
-            <div className="flex flex-col gap-2">
-              {watchControls.isWatched ? (
-                <Button
-                  onClick={watchControls.onStartOver}
-                  size="sm"
-                  className="bg-gray-600/80 hover:bg-gray-500/80 text-white border border-gray-500/50 smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
-                >
-                  <RotateCcw className="w-3 h-3 mr-1 group-hover:rotate-180 smooth-transition" />
-                  Start Over
-                </Button>
-              ) : watchControls.hasProgress ? (
-                <>
-                  <Button
-                    onClick={watchControls.onMarkWatched}
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-black font-semibold smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
-                  >
-                    <Check className="w-3 h-3 mr-1 group-hover:scale-110 smooth-transition" />
-                    Watched
-                  </Button>
-                  <Button
-                    onClick={watchControls.onStartOver}
-                    size="sm"
-                    variant="outline"
-                    className="border-gray-500/50 text-gray-300 hover:text-white hover:bg-gray-600/50 
-                             smooth-transition hover:scale-105 text-xs px-3 py-1.5"
-                  >
-                    <RotateCcw className="w-3 h-3 mr-1" />
-                    Restart
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={watchControls.onMarkWatched}
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-black font-semibold smooth-transition hover:scale-105 group text-xs px-3 py-1.5"
-                >
-                  <Play className="w-3 h-3 mr-1 group-hover:translate-x-0.5 smooth-transition" />
-                  Mark Watched
-                </Button>
-              )}
-
-              {/* Progress indicator */}
-              <div className="text-xs text-center">
-                {watchControls.isWatched ? (
-                  <span className="flex items-center justify-center gap-1 text-green-400">
-                    <Check className="w-3 h-3" />
-                    Done
-                  </span>
-                ) : watchControls.hasProgress ? (
-                  <span className="text-primary">In Progress</span>
-                ) : (
-                  <span className="text-gray-400">Not Started</span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Media Type Badge */}
-        <div className="flex items-center gap-3">
+        {/* Media Type Badge and Watchlist Button */}
+        <div className="flex items-center justify-between">
           <div
             className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 
                         rounded-full text-xs font-semibold border border-primary/30"
@@ -130,6 +61,8 @@ const MediaMeta: React.FC<MediaMetaProps> = ({
             )}
             {type === "movie" ? "Movie" : "TV Series"}
           </div>
+          
+          <WatchlistButton media={media} variant="default" />
         </div>
 
         {/* Title */}

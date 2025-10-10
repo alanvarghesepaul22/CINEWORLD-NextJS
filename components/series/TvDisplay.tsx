@@ -1,5 +1,5 @@
 import React from "react";
-import MediaCard from "./MediaCard";
+import MediaCard from "../display/MediaCard";
 import ResponsiveGrid from "../layout/ResponsiveGrid";
 import PaginationWrapper from "../layout/PaginationWrapper";
 import { TMDBTVShow } from "@/lib/types";
@@ -10,7 +10,7 @@ interface TvDisplayProps {
   totalPages?: number;
 }
 
-const TvDisplay: React.FC<TvDisplayProps> = ({ series, pageid, totalPages = 500 }) => {
+const TvDisplay = ({ series, pageid, totalPages = 500 }: TvDisplayProps) => {
   // Use base URL with query params for pagination
   const baseUrl = `/series`;
   

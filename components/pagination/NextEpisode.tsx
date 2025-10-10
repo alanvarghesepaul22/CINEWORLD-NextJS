@@ -2,8 +2,36 @@ import Link from "next/link";
 import React from "react";
 import { BiSkipPrevious, BiSkipNext } from "react-icons/bi";
 
-const NextEpisode = (props) => {
-  const { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
+interface EpisodeDetails {
+  episode_number: number | string;
+  season_number: number | string;
+}
+
+interface NextEpisodeProps {
+  episodeDetails: EpisodeDetails;
+  totalEpisodes: number;
+  seriesId: string | number;
+  totalSeasons: number;
+}
+
+interface NextEpisodeBtnProps {
+  episodeDetails: EpisodeDetails;
+  totalEpisodes: number;
+  seriesId: string | number;
+  totalSeasons: number;
+}
+
+interface PrevEpisodeBtnProps {
+  episodeDetails: EpisodeDetails;
+  seriesId: string | number;
+}
+
+const NextEpisode = ({
+  episodeDetails,
+  totalEpisodes,
+  seriesId,
+  totalSeasons,
+}: NextEpisodeProps) => {
   return (
     <div className="flex w-full md:w-2/3 items-center justify-between px-10">
       <PrevEpisodeBtn episodeDetails={episodeDetails} seriesId={seriesId} />
@@ -19,8 +47,12 @@ const NextEpisode = (props) => {
 
 export default NextEpisode;
 
-function NextEpisodeBtn(props) {
-  const { episodeDetails, totalEpisodes, seriesId, totalSeasons } = props;
+const NextEpisodeBtn = ({
+  episodeDetails,
+  totalEpisodes,
+  seriesId,
+  totalSeasons,
+}: NextEpisodeBtnProps) => {
   return (
     <>
       {Number(episodeDetails.episode_number) === totalEpisodes ? (
@@ -56,10 +88,9 @@ function NextEpisodeBtn(props) {
       )}
     </>
   );
-}
+};
 
-function PrevEpisodeBtn(props) {
-  const { episodeDetails, seriesId } = props;
+const PrevEpisodeBtn = ({ episodeDetails, seriesId }: PrevEpisodeBtnProps) => {
   return (
     <>
       {Number(episodeDetails.episode_number) === 1 ? (
@@ -93,4 +124,4 @@ function PrevEpisodeBtn(props) {
       )}
     </>
   );
-}
+};

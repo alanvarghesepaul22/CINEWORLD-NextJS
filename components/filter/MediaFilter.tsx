@@ -27,11 +27,11 @@ interface MediaFilterProps {
   type?: "movie" | "tv";
 }
 
-const MediaFilter: React.FC<MediaFilterProps> = ({
+const MediaFilter = ({
   initialFilters,
   onFiltersChange,
   type = "movie",
-}) => {
+}: MediaFilterProps) => {
   const [filters, setFilters] = useState<MediaFiltersData>(initialFilters);
   const [genres, setGenres] = useState<TMDBGenre[]>([]);
   const sortOptions: SortOption[] = [

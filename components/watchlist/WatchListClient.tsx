@@ -6,7 +6,7 @@ import MediaCard from "@/components/display/MediaCard";
 import ResponsiveGrid from "@/components/layout/ResponsiveGrid";
 import { useWatchlist } from "@/lib/useWatchlist";
 
-export default function WatchListClient() {
+const WatchListClient = () => {
   const { watchlist, isLoading } = useWatchlist();
 
   // Convert WatchlistItem to TMDBMovie/TMDBTVShow format for MediaCard
@@ -89,4 +89,5 @@ export default function WatchListClient() {
       ))}
     </ResponsiveGrid>
   );
-}
+};
+export default WatchListClient;

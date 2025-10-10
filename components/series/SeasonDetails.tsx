@@ -23,7 +23,7 @@ interface SeasonDetailsProps {
   SeasonInfos?: SeasonInfo;
 }
 
-const SeasonDetails: React.FC<SeasonDetailsProps> = ({ SeasonInfos }) => {
+const SeasonDetails = ({ SeasonInfos }: SeasonDetailsProps) => {
   
   // Early guard: return placeholder if SeasonInfos is missing
   if (!SeasonInfos) {

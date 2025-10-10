@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import PageTitle from "@/components/title/PageTitle";
 import SearchPageContent from "@/components/search/SearchPageContent";
-import PageLoading from "@/components/loading/PageLoading";
+import {PageLoading} from "@/components/loading/PageLoading";
 
 export const metadata: Metadata = {
   title: "Search | Cineworld",

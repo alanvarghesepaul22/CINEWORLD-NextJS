@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import TvDisplay from "@/components/display/TvDisplay";
+import TvDisplay from "@/components/series/TvDisplay";
 import MediaFilter from "@/components/filter/MediaFilter";
 import { TMDBTVShow } from "@/lib/types";
 import { api } from "@/lib/api";
-import PageLoading, { PageEmpty } from "@/components/loading/PageLoading";
+import { PageLoading, PageEmpty } from "@/components/loading/PageLoading";
 
 interface SeriesFiltersData {
   category: string;
@@ -13,7 +13,7 @@ interface SeriesFiltersData {
   year: string;
   sortBy: string;
 }
-export default function SeriesPageClient() {
+const SeriesPageClient = () => {
   const [series, setSeries] = useState<TMDBTVShow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,4 +134,5 @@ export default function SeriesPageClient() {
       )}
     </>
   );
-}
+};
+export default SeriesPageClient;

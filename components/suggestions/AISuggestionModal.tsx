@@ -1,10 +1,4 @@
-/**
- * AI Suggestion Modal - Displays AI-powered movie/series recommendations
- * Features a modern glass morphism design with interactive elements
- */
-
 "use client";
-
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -37,20 +31,21 @@ interface AISuggestion {
 // Type guard function
 function isValidSuggestion(data: unknown): data is AISuggestion {
   return (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'title' in data &&
-    'year' in data &&
-    'type' in data &&
-    'overview' in data &&
-    'reason' in data &&
-    'searchKeyword' in data &&
-    typeof (data as AISuggestion).title === 'string' &&
-    typeof (data as AISuggestion).year === 'string' &&
-    (((data as AISuggestion).type === 'movie') || ((data as AISuggestion).type === 'series')) &&
-    typeof (data as AISuggestion).overview === 'string' &&
-    typeof (data as AISuggestion).reason === 'string' &&
-    typeof (data as AISuggestion).searchKeyword === 'string'
+    "title" in data &&
+    "year" in data &&
+    "type" in data &&
+    "overview" in data &&
+    "reason" in data &&
+    "searchKeyword" in data &&
+    typeof (data as AISuggestion).title === "string" &&
+    typeof (data as AISuggestion).year === "string" &&
+    ((data as AISuggestion).type === "movie" ||
+      (data as AISuggestion).type === "series") &&
+    typeof (data as AISuggestion).overview === "string" &&
+    typeof (data as AISuggestion).reason === "string" &&
+    typeof (data as AISuggestion).searchKeyword === "string"
   );
 }
 
@@ -66,10 +61,7 @@ interface AISuggestionModalProps {
   onClose: () => void;
 }
 
-const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+const AISuggestionModal = ({ isOpen, onClose }: AISuggestionModalProps) => {
   const router = useRouter();
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +118,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
         let data: AIResponse | null;
         let responseBody: string;
         try {
-          data = await response.json() as AIResponse;
+          data = (await response.json()) as AIResponse;
           responseBody = JSON.stringify(data);
         } catch {
           // Fallback to text if JSON parsing fails
@@ -136,14 +128,17 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
 
         if (!response.ok) {
           // Create detailed error message with status and body content
-          const errorMessage = data?.error || responseBody || `HTTP ${response.status}`;
-          throw new Error(`Request failed (${response.status}): ${errorMessage}`);
+          const errorMessage =
+            data?.error || responseBody || `HTTP ${response.status}`;
+          throw new Error(
+            `Request failed (${response.status}): ${errorMessage}`
+          );
         }
 
         if (data?.success && data?.suggestion) {
           // Validate the suggestion object structure
           const suggestionData = data.suggestion;
-          
+
           if (isValidSuggestion(suggestionData)) {
             setSuggestion(suggestionData);
             setHasGenerated(true);
@@ -161,7 +156,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({
       }
     } catch (err) {
       // handle abort separately
-      if (err instanceof Error && err.name === 'AbortError') {
+      if (err instanceof Error && err.name === "AbortError") {
         setError("Request timed out. Please try again.");
         return;
       }

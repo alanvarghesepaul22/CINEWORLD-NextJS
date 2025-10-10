@@ -13,7 +13,7 @@ interface EpisodeDisplayProps {
   seriesId: string;
 }
 
-const EpisodeDisplay: React.FC<EpisodeDisplayProps> = ({ EpisodeInfos, seriesId }) => {
+const EpisodeDisplay = ({ EpisodeInfos, seriesId }: EpisodeDisplayProps) => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Section Header */}

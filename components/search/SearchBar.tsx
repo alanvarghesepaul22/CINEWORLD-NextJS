@@ -5,19 +5,15 @@ import { AiOutlineClose } from "react-icons/ai";
 
 interface SearchBarProps {
   onTyping: (value: string) => void;
-  /** 
-   * Optional explicit search callback. If provided, search button and Enter key
-   * will trigger immediate search. If not provided, falls back to calling onTyping
-   * with current value to ensure search happens regardless of debouncing strategy.
-   */
   onSearch?: (value: string) => void;
-  /**
-   * Initial value for the search input
-   */
   initialValue?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue = "" }) => {
+const SearchBar = ({
+  onTyping,
+  onSearch,
+  initialValue = "",
+}: SearchBarProps) => {
   const searchBarRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState<string>(initialValue);
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -52,7 +48,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue 
       // Fallback: trigger search by calling onTyping with current value
       onTyping(searchValue);
     }
-    
+
     // Keep input focused for better UX - user can continue typing
     searchBarRef.current?.focus();
   };
@@ -63,7 +59,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue 
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSearchClick();
     }
@@ -74,23 +70,26 @@ const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue 
 
   useEffect(() => {
     searchBarRef?.current?.focus?.();
-  }, [])
+  }, []);
 
   return (
     <div className="flex justify-center mt-10 mx-4">
       <div className="relative max-w-xl w-full">
         {/* Search Container */}
-        <div className={`relative flex items-center bg-gradient-to-r from-black to-gray-900 rounded-xl border-2 transition-all duration-300 overflow-hidden backdrop-blur-lg ${
-          isFocused 
-            ? 'border-primary shadow-lg shadow-primary/20 scale-105' 
-            : 'border-gray-700 hover:border-gray-600'
-        }`}>
-          
+        <div
+          className={`relative flex items-center bg-gradient-to-r from-black to-gray-900 rounded-xl border-2 transition-all duration-300 overflow-hidden backdrop-blur-lg ${
+            isFocused
+              ? "border-primary shadow-lg shadow-primary/20 scale-105"
+              : "border-gray-700 hover:border-gray-600"
+          }`}
+        >
           {/* Search Icon */}
           <div className="pl-4 pr-3">
-            <BiSearch className={`text-xl transition-colors duration-300 ${
-              isFocused ? 'text-primary' : 'text-gray-400'
-            }`} />
+            <BiSearch
+              className={`text-xl transition-colors duration-300 ${
+                isFocused ? "text-primary" : "text-gray-400"
+              }`}
+            />
           </div>
 
           {/* Input Field */}
@@ -139,10 +138,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ onTyping, onSearch, initialValue 
         {isFocused && searchValue && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-black/95 backdrop-blur-lg border border-gray-700 rounded-xl shadow-xl z-50">
             <div className="p-3 text-gray-400 text-sm">
-              {searchValue.length < 3 
-                ? `Type ${3 - searchValue.length} more character${3 - searchValue.length !== 1 ? 's' : ''} to search`
-                : `Press Enter or click search to find "${searchValue}"`
-              }
+              {searchValue.length < 3
+                ? `Type ${3 - searchValue.length} more character${
+                    3 - searchValue.length !== 1 ? "s" : ""
+                  } to search`
+                : `Press Enter or click search to find "${searchValue}"`}
             </div>
           </div>
         )}

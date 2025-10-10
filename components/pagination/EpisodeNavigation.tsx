@@ -16,14 +16,14 @@ interface EpisodeNavigationProps {
  * EpisodeNavigation - Modern navigation component for episodes with glass morphism design
  * Features smooth transitions, intelligent navigation logic, and robust data validation
  */
-const EpisodeNavigation: React.FC<EpisodeNavigationProps> = ({
+const EpisodeNavigation = ({
   seriesId,
   currentSeason,
   currentEpisode,
   totalEpisodes,
   totalSeasons,
   className = ""
-}) => {
+}: EpisodeNavigationProps) => {
   // Validate input data to prevent crashes
   const validSeriesId = seriesId ? String(seriesId) : null;
   const validCurrentSeason = Math.max(1, Number(currentSeason) || 1);

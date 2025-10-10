@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import SeasonNotFound from "@/components/not-found/SeasonNotFound";
-import SeasonInfo from "@/components/info/SeasonInfo";
+import SeasonInfo from "@/components/series/SeasonInfo";
 
 export const metadata: Metadata = {
   title: "Series | Cineworld",

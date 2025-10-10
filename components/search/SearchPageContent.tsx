@@ -1,32 +1,31 @@
 "use client";
-import SearchDisplay from "@/components/display/SearchDisplay";
+import SearchDisplay from "@/components/search/SearchDisplay";
 import FilterWrapper from "@/components/filter/FilterWrapper";
-import SearchBar from "@/components/searchbar/SearchBar";
+import SearchBar from "@/components/search/SearchBar";
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 import { api } from "@/lib/api";
-import PageLoading from "../loading/PageLoading";
+import { PageLoading } from "../loading/PageLoading";
 
 type ContentSource = "search" | "filter" | "none";
 
-/**
- * Async Results Component - wrapped in its own Suspense boundary
- */
-const AsyncResultsSection: React.FC<{
+interface AsyncResultsSectionProps {
   isLoading: boolean;
   displayResults: (TMDBMovie | TMDBTVShow)[];
   activeSource: ContentSource;
   currentError: string | null;
   statusMessage: string | null;
-}> = ({
+}
+
+const AsyncResultsSection = ({
   isLoading,
   displayResults,
   activeSource,
   currentError,
   statusMessage,
-}) => {
+}: AsyncResultsSectionProps) => {
   return (
     <>
       {/* Status Message */}
@@ -76,7 +75,7 @@ const AsyncResultsSection: React.FC<{
   );
 };
 
-const SearchPageContent: React.FC = () => {
+const SearchPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 

@@ -1,13 +1,14 @@
 import React from "react";
-import SeasonCard from "./SeasonCard";
+
 import { TMDBSeason, TMDBTVDetail } from "@/lib/types";
+import SeasonCard from "./SeasonCard";
 
 interface SeasonDisplayProps {
   SeasonCards?: TMDBSeason[];
   TvDetails: TMDBTVDetail;
 }
 
-const SeasonDisplay: React.FC<SeasonDisplayProps> = ({ SeasonCards, TvDetails }) => {
+const SeasonDisplay = ({ SeasonCards, TvDetails }: SeasonDisplayProps) => {
   return (
     <>
       <h1 className="text-white text-xl sm:text-2xl text-center my-2">

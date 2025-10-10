@@ -1,8 +1,9 @@
 import { api } from "@/lib/api";
 import SeasonNotFound from "../not-found/SeasonNotFound";
 import ImageCard from "../display/ImageCard";
+
+import EpisodeDisplay from "./EpisodeDisplay";
 import SeasonDetails from "./SeasonDetails";
-import EpisodeDisplay from "../display/EpisodeDisplay";
 
 async function getSeasonDetails(seriesId: string, seasonId: string) {
   try {
@@ -51,13 +52,12 @@ async function getSeasonDetails(seriesId: string, seasonId: string) {
   }
 }
 
-const SeasonInfo = async ({
-  seasonId,
-  seriesId,
-}: {
+interface SeasonInfoProps {
   seasonId: string;
   seriesId: string;
-}) => {
+}
+
+const SeasonInfo = async ({ seasonId, seriesId }: SeasonInfoProps) => {
   const {
     data: SeasonInfos,
     id,

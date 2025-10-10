@@ -1,5 +1,3 @@
-import React from "react";
-
 interface SectionHeaderProps {
   children: React.ReactNode;
   className?: string;
@@ -9,10 +7,7 @@ interface SectionHeaderProps {
  * Wrapper component for section headers with space-between layout
  * Commonly used for title + action button combinations
  */
-const SectionHeader: React.FC<SectionHeaderProps> = ({ 
-  children, 
-  className = "" 
-}) => {
+const SectionHeader = ({ children, className = "" }: SectionHeaderProps) => {
   return (
     <div className={`flex items-center justify-between mb-6 ${className}`}>
       {children}

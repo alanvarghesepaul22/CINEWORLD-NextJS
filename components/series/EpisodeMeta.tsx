@@ -17,7 +17,7 @@ interface EpisodeMetaProps {
  * EpisodeMeta - Modern episode metadata component with glass morphism design
  * Features responsive layout and beautiful typography
  */
-const EpisodeMeta: React.FC<EpisodeMetaProps> = ({
+const EpisodeMeta = ({
   seasonNumber,
   episodeNumber,
   episodeTitle,
@@ -26,7 +26,7 @@ const EpisodeMeta: React.FC<EpisodeMetaProps> = ({
   overview,
   seriesTitle,
   className = ""
-}) => {
+}: EpisodeMetaProps) => {
   // Use the centralized date formatting utility with long month format
   const formattedDate = formatDate(airDate, undefined, {
     year: 'numeric',

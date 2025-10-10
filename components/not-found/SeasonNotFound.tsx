@@ -1,7 +1,11 @@
 import React from "react";
 import RefreshButton from "@/components/ui/RefreshButton";
 
-export default function SeasonNotFound({ seasonId }: { seasonId: string }) {
+interface SeasonNotFoundProps {
+  seasonId: string;
+}
+
+const SeasonNotFound = ({ seasonId }: SeasonNotFoundProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">
       <div className="glass-container text-center max-w-md w-full">
@@ -36,4 +40,5 @@ export default function SeasonNotFound({ seasonId }: { seasonId: string }) {
       </div>
     </div>
   );
-}
+};
+export default SeasonNotFound;

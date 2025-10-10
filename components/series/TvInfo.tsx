@@ -2,10 +2,9 @@
 import React, { useEffect, useState } from "react";
 import MediaDetailLayout from "../layout/MediaDetailLayout";
 import MediaPoster from "../display/MediaPoster";
-import MediaMeta from "./MediaMeta";
-import SeasonDisplay from "../display/SeasonDisplay";
-import DidYouKnowSection from "./DidYouKnowSection";
-import { useResume } from "@/lib/useResume";
+import MediaMeta from "../info/MediaMeta";
+import SeasonDisplay from "./SeasonDisplay";
+import DidYouKnowSection from "../info/DidYouKnowSection";
 import { Genre, TMDBTVDetail } from "@/lib/types";
 import { InfoLoading } from "../loading/PageLoading";
 import { api } from "@/lib/api";
@@ -21,11 +20,10 @@ interface TvInfoProps {
   id: number;
 }
 
-const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
+const TvInfo = ({ id }: TvInfoProps) => {
   const [seriesData, setSeriesData] = useState<SeriesData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const { getProgress, markAsWatched, startOver, isWatched } = useResume();
 
   useEffect(() => {
     let isMounted = true;
@@ -69,7 +67,10 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
           setIsLoading(false);
         } else {
           // For other errors, show error state
-          console.error("[SeriesDetail] Failed to fetch series details:", error_);
+          console.error(
+            "[SeriesDetail] Failed to fetch series details:",
+            error_
+          );
           setNotFound(true); // Show not found for any error for now
           setIsLoading(false);
         }
@@ -83,8 +84,6 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
     };
   }, [id]);
 
-  const progress = getProgress(seriesData?.id, "tv");
-  const watched = isWatched(seriesData?.id, "tv");
   const tvDetail = seriesData?.data;
   // Defensive extraction with safe defaults
   const seasons = tvDetail?.seasons ?? [];
@@ -95,6 +94,26 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
   const firstAirYear = tvDetail?.first_air_date
     ? tvDetail.first_air_date.slice(0, 4)
     : undefined;
+
+  // Convert tvDetail to TMDBTVShow format for WatchlistButton
+  const mediaForWatchlist = tvDetail
+    ? {
+        id: tvDetail.id,
+        name: tvDetail.name,
+        overview: tvDetail.overview,
+        poster_path: tvDetail.poster_path,
+        backdrop_path: tvDetail.backdrop_path,
+        first_air_date: tvDetail.first_air_date,
+        vote_average: tvDetail.vote_average,
+        vote_count: tvDetail.vote_count,
+        popularity: tvDetail.popularity,
+        genre_ids: tvDetail.genres?.map((g) => g.id) || [],
+        origin_country: tvDetail.origin_country,
+        original_language: tvDetail.original_language,
+        original_name: tvDetail.original_name,
+        adult: false,
+      }
+    : null;
 
   // Not Found State
   if (notFound) {
@@ -132,12 +151,7 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
               episodes={episodeCount}
               genres={seriesData.genreArr}
               overview={tvDetail.overview}
-              watchControls={{
-                isWatched: watched,
-                hasProgress: progress > 0,
-                onMarkWatched: () => markAsWatched(Number(tvDetail.id), "tv"),
-                onStartOver: () => startOver(Number(tvDetail.id), "tv"),
-              }}
+              media={mediaForWatchlist!}
             />
           </div>
         </div>
@@ -146,12 +160,12 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
         {seasons.length > 0 && (
           <div className="glass-container">
             <div className="space-y-6">
-              <div>
+              <>
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
                   Seasons & Episodes
                 </h2>
                 <div className="w-full h-px bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
-              </div>
+              </>
 
               <SeasonDisplay
                 key={tvDetail?.id}
@@ -164,10 +178,7 @@ const TvInfo: React.FC<TvInfoProps> = ({ id }) => {
 
         {/* Did You Know Section - Full Width */}
         <div className="max-w-6xl mx-auto">
-          <DidYouKnowSection
-            title={title}
-            movieData={tvDetail}
-          />
+          <DidYouKnowSection title={title} movieData={tvDetail} />
         </div>
       </div>
     </MediaDetailLayout>

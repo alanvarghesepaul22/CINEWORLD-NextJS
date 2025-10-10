@@ -38,13 +38,11 @@ const Header = () => {
           <AiSuggestionLink />
 
           {/* Search Icon */}
-          <div>
-            <Link href="/search">
-              <div className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 hover:scale-110">
-                <BiSearch className="text-lg text-white hover:text-primary transition-colors" />
-              </div>
-            </Link>
-          </div>
+          <Link href="/search">
+            <div className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 hover:scale-110">
+              <BiSearch className="text-lg text-white hover:text-primary transition-colors" />
+            </div>
+          </Link>
 
           {/* Mobile Hamburger Button */}
           <MobileMenu />

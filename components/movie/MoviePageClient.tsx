@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import MovieDisplay from "@/components/display/MovieDisplay";
+import MovieDisplay from "@/components/movie/MovieDisplay";
 import MediaFilter from "@/components/filter/MediaFilter";
 import { TMDBMovie } from "@/lib/types";
 import { api } from "@/lib/api";
-import PageLoading, { PageEmpty } from "@/components/loading/PageLoading";
+import { PageLoading, PageEmpty } from "@/components/loading/PageLoading";
 interface MovieFiltersData {
   category: string;
   genre: string;
@@ -13,7 +13,7 @@ interface MovieFiltersData {
   sortBy: string;
 }
 
-export default function MoviePageClient() {
+const MoviePageClient = () => {
   const [movies, setMovies] = useState<TMDBMovie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -135,4 +135,5 @@ export default function MoviePageClient() {
       )}
     </>
   );
-}
+};
+export default MoviePageClient;

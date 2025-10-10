@@ -1,5 +1,5 @@
 import React from "react";
-import MediaCard from "./MediaCard";
+import MediaCard from "../display/MediaCard";
 import ResponsiveGrid from "../layout/ResponsiveGrid";
 import { TMDBMovie, TMDBTVShow } from "@/lib/types";
 
@@ -7,7 +7,7 @@ interface SearchDisplayProps {
   movies: (TMDBMovie | TMDBTVShow)[];
 }
 
-const SearchDisplay: React.FC<SearchDisplayProps> = ({ movies }) => {
+const SearchDisplay = ({ movies }: SearchDisplayProps) => {
   return (
     <ResponsiveGrid minHeight={true}>
       {movies?.map((movie) => (

@@ -13,14 +13,14 @@ interface MediaPlayerProps {
  * MediaPlayer - Modern, responsive video player component
  * Features glass morphism container with optimal aspect ratio
  */
-const MediaPlayer: React.FC<MediaPlayerProps> = ({
+const MediaPlayer = ({
   mediaId,
   title,
   type = "movie",
   season,
   episode,
   className = "",
-}) => {
+}: MediaPlayerProps) => {
   // Construct embed URL with episode-specific parameters for TV shows
   const embedUrl =
     type === "movie"

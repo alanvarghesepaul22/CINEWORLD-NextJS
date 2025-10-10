@@ -13,16 +13,16 @@ interface PaginationWrapperProps {
 /**
  * Internal component that uses useSearchParams
  */
-const PaginationContent: React.FC<PaginationWrapperProps> = ({ 
-  pageid, 
-  baseUrl, 
-  maxPage = 500
-}) => {
+const PaginationContent = ({
+  pageid,
+  baseUrl,
+  maxPage = 500,
+}: PaginationWrapperProps) => {
   const searchParams = useSearchParams();
 
   return (
-    <GenericPagination 
-      currentPage={pageid} 
+    <GenericPagination
+      currentPage={pageid}
       baseUrl={baseUrl}
       maxPage={maxPage}
       queryParams={searchParams}
@@ -34,11 +34,11 @@ const PaginationContent: React.FC<PaginationWrapperProps> = ({
  * Wrapper component for consistent pagination implementation
  * Handles null/undefined pageid gracefully and provides consistent styling
  */
-const PaginationWrapper: React.FC<PaginationWrapperProps> = ({ 
-  pageid, 
-  baseUrl, 
+const PaginationWrapper: React.FC<PaginationWrapperProps> = ({
+  pageid,
+  baseUrl,
   maxPage = 500,
-  className = ""
+  className = "",
 }) => {
   // Only render pagination if pageid is provided and valid
   if (pageid == null) {
@@ -47,8 +47,14 @@ const PaginationWrapper: React.FC<PaginationWrapperProps> = ({
 
   return (
     <div className={className}>
-      <Suspense fallback={<div className="py-8 text-center text-gray-400">Loading pagination...</div>}>
-        <PaginationContent 
+      <Suspense
+        fallback={
+          <div className="py-8 text-center text-gray-400">
+            Loading pagination...
+          </div>
+        }
+      >
+        <PaginationContent
           pageid={pageid}
           baseUrl={baseUrl}
           maxPage={maxPage}

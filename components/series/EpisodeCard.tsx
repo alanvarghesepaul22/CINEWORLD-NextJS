@@ -15,7 +15,7 @@ interface EpisodeCardProps {
   seriesId: string;
 }
 
-const EpisodeCard: React.FC<EpisodeCardProps> = ({ episodeinfo, seriesId }) => {
+const EpisodeCard = ({ episodeinfo, seriesId }: EpisodeCardProps) => {
   const still_path = episodeinfo.still_path
     ? `https://image.tmdb.org/t/p/w342/${episodeinfo.still_path}`
     : "https://i.imgur.com/HIYYPtZ.png";
@@ -41,7 +41,7 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episodeinfo, seriesId }) => {
             height={160}
             unoptimized
           />
-          
+
           {/* Episode Badge */}
           <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1">
             <span className="text-primary text-xs font-semibold">
@@ -55,11 +55,11 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episodeinfo, seriesId }) => {
           <h3 className="text-white font-medium text-sm sm:text-base line-clamp-2 group-hover:text-primary smooth-transition">
             {episodeinfo.name}
           </h3>
-          
+
           <p className="text-gray-400 text-xs sm:text-sm">
             {formattedDate || "TBD"}
           </p>
-          
+
           {episodeinfo.overview && (
             <p className="text-gray-300 text-xs sm:text-sm line-clamp-2 sm:line-clamp-3 leading-relaxed">
               {episodeinfo.overview}

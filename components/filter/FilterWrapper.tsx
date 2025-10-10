@@ -24,11 +24,11 @@ interface FilterWrapperProps {
  * FilterWrapper - Independent filter system that uses TMDB discover API
  * This component is completely separate from search functionality
  */
-const FilterWrapper: React.FC<FilterWrapperProps> = ({
+const FilterWrapper= ({
   onResultsChange,
   onLoadingChange,
   onErrorChange,
-}) => {
+}: FilterWrapperProps) => {
   const [filters, setFilters] = useState<FilterState>({
     genre: "",
     mediaType: "",

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import PageTitle from "@/components/title/PageTitle";
 import SeriesPageClient from "@/components/series/SeriesPageClient";
-import PageLoading from "@/components/loading/PageLoading";
+import {PageLoading} from "@/components/loading/PageLoading";
 
 export const metadata: Metadata = {
   title: "All TV Shows | Cineworld",

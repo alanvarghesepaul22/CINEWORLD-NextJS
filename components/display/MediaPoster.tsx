@@ -12,12 +12,12 @@ interface MediaPosterProps {
  * MediaPoster - A modern, responsive poster component with glass morphism effects
  * Optimized for both movie and TV show posters with fallback support
  */
-const MediaPoster: React.FC<MediaPosterProps> = ({ 
+const MediaPoster = ({ 
   posterPath, 
   title, 
   alt,
   className = "" 
-}) => {
+}: MediaPosterProps) => {
   const imageSrc = posterPath 
     ? `https://image.tmdb.org/t/p/w500/${posterPath}`
     : "https://i.imgur.com/wjVuAGb.png";

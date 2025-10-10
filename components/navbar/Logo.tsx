@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
 
-const Logo: React.FC = () => {
+const Logo = () => {
   return (
     <Link
       href="/"
