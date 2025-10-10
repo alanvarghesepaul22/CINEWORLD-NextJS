@@ -1,10 +1,48 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['image.tmdb.org', 'imgur.com', 'arc.io', 'i.imgur.com'],
+        remotePatterns: [
+          {
+            protocol: 'https',
+            hostname: 'image.tmdb.org',
+            port: '',
+            pathname: '/**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'imgur.com',
+            port: '',
+            pathname: '/**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'i.imgur.com',
+            port: '',
+            pathname: '/**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'arc.io',
+            port: '',
+            pathname: '/**',
+          },
+        ],
       },
       env: {
         API_KEY: process.env.API_KEY,
+        TMDB_ACCESS_TOKEN: process.env.TMDB_ACCESS_TOKEN,
+      },
+      webpack: (config, { dev }) => {
+        // Optimize webpack cache for better stability
+        if (dev) {
+          config.cache = {
+            type: 'filesystem',
+            buildDependencies: {
+              config: [__filename],
+            },
+          };
+        }
+        return config;
       },
 }
 
