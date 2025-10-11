@@ -177,7 +177,9 @@ const DidYouKnowSection = ({
               Generate AI Facts
             </Button>
             <p className="text-gray-500 text-xs mt-3">
-              Powered by Google Gemini AI
+              Powered by Google Gemini AI. Note that the generated facts may be
+              fictional or based on speculation. <br /> They are not intended for use in
+              any commercial or legal context. Use at your own discretion.
             </p>
           </div>
         ) : isLoading ? (
