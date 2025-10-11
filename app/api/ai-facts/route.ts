@@ -1,5 +1,5 @@
 /**
- * AI Facts API Route - Clean Gemini API integration with fact verification
+ * AI Facts API Route - Clean Gemini API integration
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -106,7 +106,7 @@ function validateMovieData(data: unknown): { valid: boolean; error?: string } {
 }
 
 /**
- * POST /api/ai-facts - Generate AI-powered facts with web search verification
+ * POST /api/ai-facts - Generate AI-powered facts using Gemini API
  */
 export async function POST(request: NextRequest) {
   try {
@@ -144,18 +144,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate facts with web search verification enabled by default
+    // Generate facts using Gemini API
     const movieData: MovieData = body;
     const geminiService = getGeminiService();
-    const enableVerification = request.nextUrl.searchParams.get("verify") !== "false";
     
     securityLogger.info("Starting AI facts generation", {
       clientId: clientId.replace(/^(ip:|fingerprint:)/, ""),
       movieTitle: (body.title || body.name || "unknown").substring(0, 50),
-      enableVerification,
     });
 
-    const result = await geminiService.generateFacts(movieData, enableVerification);
+    const result = await geminiService.generateFacts(movieData);
 
     if (!result.success) {
       return NextResponse.json(
@@ -175,8 +173,6 @@ export async function POST(request: NextRequest) {
       clientId: clientId.replace(/^(ip:|fingerprint:)/, ""),
       factsCount: result.facts.length,
       movieTitle: (body.title || body.name || "unknown").substring(0, 50),
-      withVerification: !!movieData.verified_facts,
-      verificationConfidence: movieData.verified_facts?.search_confidence,
     });
 
     return NextResponse.json(
@@ -184,9 +180,6 @@ export async function POST(request: NextRequest) {
         facts: result.facts,
         success: true,
         count: result.facts.length,
-        verified: !!movieData.verified_facts,
-        verification_confidence: movieData.verified_facts?.search_confidence,
-        mode: movieData.verified_facts ? "web-verified" : "pure-gemini",
       },
       { headers: responseHeaders }
     );

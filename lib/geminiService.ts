@@ -1,11 +1,10 @@
 /**
  * Gemini AI Service for Movie & Series Insights
- * Clean, streamlined implementation with fact verification
+ * Clean, streamlined implementation using Gemini API
  */
 
 import { GoogleGenAI } from "@google/genai";
 import { getLogger } from "./logger";
-import { type VerifiedFacts, getFactVerificationService } from "./factVerificationService";
 
 interface MovieData {
   title?: string;
@@ -28,8 +27,6 @@ interface MovieData {
   number_of_seasons?: number;
   number_of_episodes?: number;
   networks?: { name: string }[];
-  // Verified facts from web search
-  verified_facts?: VerifiedFacts;
 }
 
 interface AIFactsResponse {
@@ -66,7 +63,7 @@ class GeminiService {
   }
 
   /**
-   * Creates prompt for generating movie/series facts with verified information
+   * Creates prompt for generating movie/series facts
    */
   private createMoviePrompt(data: MovieData): string {
     const isTV = !!data.name;
@@ -75,20 +72,11 @@ class GeminiService {
       ? data.first_air_date ? new Date(data.first_air_date).getFullYear() : "Unknown"
       : data.release_date ? new Date(data.release_date).getFullYear() : "Unknown";
 
-    // Include verified facts if available
-    const verifiedFactsSection = data.verified_facts 
-      ? this.formatVerifiedFacts(data.verified_facts)
-      : "";
+    return `You are an expert cinematic researcher with deep knowledge of movies and TV shows.
 
-    return `You are an expert cinematic researcher generating exciting facts about movies and TV shows.
+GOAL: Generate Top 10 most exciting and factual information about "${title}" (${releaseYear}) - a ${isTV ? "TV Series" : "Movie"}.
 
-${verifiedFactsSection}
-
-GOAL: Generate Top 10 most exciting facts about "${title}" (${releaseYear}) - a ${isTV ? "TV Series" : "Movie"}.
-
-${data.verified_facts ? 
-`IMPORTANT: Use ONLY the verified facts provided above. Transform them into compelling narratives without adding unverified information.` :
-`Focus on verifiable facts like box office performance, awards, cast details, production stories, and notable controversies.`}
+IMPORTANT: Use only your training data knowledge. Focus on well-known, verifiable facts that would be commonly reported.
 
 Basic Info:
 - Overview: ${data.overview || "Not available"}
@@ -101,37 +89,17 @@ ${isTV && data.networks?.length ? `- Networks: ${data.networks.map(n => n.name).
 ${isTV && data.number_of_seasons ? `- Seasons: ${data.number_of_seasons}, Episodes: ${data.number_of_episodes}` : ""}
 
 Requirements:
-1. ${data.verified_facts ? "Use ONLY verified facts above" : "Focus on verifiable, exciting details"}
+1. Focus on widely-known, well-documented facts from your training data
 2. Format as compelling, single-paragraph facts
 3. Include box office/streaming performance if available
 4. Cover production stories, cast details, awards, controversies
 5. Make each fact attention-grabbing and viral-worthy
+6. Ensure accuracy - only include information you're confident about
 
 Return exactly 10 facts as JSON array:
 ["Exciting fact 1", "Exciting fact 2", ...]
 
 Return ONLY the JSON array, no other text.`;
-  }
-
-  /**
-   * Formats verified facts for AI prompt
-   */
-  private formatVerifiedFacts(facts: VerifiedFacts): string {
-    const sections: string[] = [];
-
-    sections.push("=== VERIFIED FACTS (Use ONLY these details) ===");
-
-    if (facts.lead_actor) sections.push(`VERIFIED LEAD ACTOR: ${facts.lead_actor}`);
-    if (facts.director) sections.push(`VERIFIED DIRECTOR: ${facts.director}`);
-    if (facts.box_office) sections.push(`VERIFIED BOX OFFICE: ${facts.box_office}`);
-    if (facts.awards.length > 0) sections.push(`VERIFIED AWARDS: ${facts.awards.join("; ")}`);
-    if (facts.controversies.length > 0) sections.push(`VERIFIED EVENTS: ${facts.controversies.join("; ")}`);
-
-    sections.push(`VERIFICATION CONFIDENCE: ${facts.search_confidence.toUpperCase()}`);
-    sections.push("=== END VERIFIED FACTS ===");
-    sections.push("");
-
-    return sections.join("\n");
   }
 
   /**
@@ -282,9 +250,9 @@ Return ONLY the JSON object, no other text.`;
   }
 
   /**
-   * Generates AI-powered facts with optional web search verification
+   * Generates AI-powered facts using Gemini API
    */
-  async generateFacts(data: MovieData, enableFactVerification: boolean = true): Promise<AIFactsResponse> {
+  async generateFacts(data: MovieData): Promise<AIFactsResponse> {
     try {
       const title = data.name || data.title;
 
@@ -292,39 +260,9 @@ Return ONLY the JSON object, no other text.`;
         throw new Error("Title is required");
       }
 
-      this.logger.info("Generating AI facts", { title, enableFactVerification });
+      this.logger.info("Generating AI facts", { title });
 
-      // Attempt fact verification if enabled
-      if (enableFactVerification && !data.verified_facts) {
-        try {
-          const factVerificationService = getFactVerificationService();
-          const releaseYear = data.release_date 
-            ? new Date(data.release_date).getFullYear().toString()
-            : data.first_air_date 
-            ? new Date(data.first_air_date).getFullYear().toString()
-            : undefined;
-
-          const verifiedFacts = await factVerificationService.verifyFacts(title, releaseYear);
-          data.verified_facts = verifiedFacts;
-
-          this.logger.info("Fact verification completed", { 
-            title, 
-            confidence: verifiedFacts.search_confidence,
-            usedSerpApi: true,
-          });
-        } catch (verificationError) {
-          this.logger.warn("Fact verification failed, using pure Gemini mode", {
-            title,
-            error: verificationError instanceof Error ? verificationError.message : "Unknown error",
-          });
-          // Continue without verified facts - Gemini will generate based on its training data
-        }
-      }
-
-      // Use enhanced prompt if verification failed or was skipped
-      const prompt = !data.verified_facts && enableFactVerification 
-        ? this.createFallbackPrompt(data)
-        : this.createMoviePrompt(data);
+      const prompt = this.createMoviePrompt(data);
 
       const response = await this.ai.models.generateContent({
         model: this.MODEL_NAME,
@@ -344,8 +282,6 @@ Return ONLY the JSON object, no other text.`;
       this.logger.info("Successfully generated AI facts", {
         title,
         factsCount: facts.length,
-        withVerification: !!data.verified_facts,
-        mode: data.verified_facts ? "verified" : "pure-gemini",
       });
 
       return { facts, success: true };
@@ -361,45 +297,6 @@ Return ONLY the JSON object, no other text.`;
     }
   }
 
-  /**
-   * Creates fallback prompt for pure Gemini mode (when SerpApi fails)
-   */
-  private createFallbackPrompt(data: MovieData): string {
-    const isTV = !!data.name;
-    const title = isTV ? data.name : data.title;
-    const releaseYear = isTV
-      ? data.first_air_date ? new Date(data.first_air_date).getFullYear() : "Unknown"
-      : data.release_date ? new Date(data.release_date).getFullYear() : "Unknown";
-
-    return `You are an expert cinematic researcher with deep knowledge of movies and TV shows.
-
-GOAL: Generate Top 10 most exciting and factual information about "${title}" (${releaseYear}) - a ${isTV ? "TV Series" : "Movie"}.
-
-IMPORTANT: Use only your training data knowledge. Focus on well-known, verifiable facts that would be commonly reported.
-
-Basic Info:
-- Overview: ${data.overview || "Not available"}
-- Language: ${data.original_language || "en"}
-- Genres: ${data.genres?.map(g => g.name).join(", ") || "various"}
-- Runtime: ${data.runtime ? `${data.runtime} minutes` : "not specified"}
-${data.production_companies?.length ? `- Producers: ${data.production_companies.map(pc => pc.name).join(", ")}` : ""}
-${isTV && data.created_by?.length ? `- Creators: ${data.created_by.map(c => c.name).join(", ")}` : ""}
-${isTV && data.networks?.length ? `- Networks: ${data.networks.map(n => n.name).join(", ")}` : ""}
-${isTV && data.number_of_seasons ? `- Seasons: ${data.number_of_seasons}, Episodes: ${data.number_of_episodes}` : ""}
-
-Requirements:
-1. Focus on widely-known, well-documented facts from your training data
-2. Include cast information, production details, reception, and notable achievements
-3. Avoid speculation or uncertain information
-4. Format as compelling, single-paragraph facts
-5. Cover performance, critical reception, cultural impact, and notable trivia
-6. Make each fact attention-grabbing and informative
-
-Return exactly 10 facts as JSON array:
-["Well-documented fact 1", "Well-documented fact 2", ...]
-
-Return ONLY the JSON array, no other text.`;
-  }
 }
 
 // Singleton instance
