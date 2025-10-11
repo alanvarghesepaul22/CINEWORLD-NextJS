@@ -7,30 +7,45 @@ import { createHash } from "crypto";
 import { getGeminiService, type MovieData } from "@/lib/geminiService";
 import { securityLogger } from "@/lib/logger";
 
-// Rate limiting
-const RATE_LIMIT_REQUESTS = 10;
+// Rate limiting configuration
+const RATE_LIMIT_REQUESTS = 30; // Increased for production use
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
-// Cleanup expired entries every 10 minutes
-setInterval(() => {
+// Allowed origins (from env or defaults)
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map(origin => origin.trim())
+  : ["http://localhost:3000"];
+
+/**
+ * Cleanup expired rate limit entries
+ */
+function cleanupRateLimitStore() {
   const now = Date.now();
   for (const [key, value] of rateLimitStore.entries()) {
     if (now > value.resetTime) {
       rateLimitStore.delete(key);
     }
   }
-}, 10 * 60 * 1000);
+}
 
 /**
- * Get client IP for logging
+ * Get client IP for logging (supports various production environments)
  */
 function getClientIP(request: NextRequest): string {
+  // Check multiple headers used by different hosting platforms
   const forwardedFor = request.headers.get("x-forwarded-for");
   const realIp = request.headers.get("x-real-ip");
-
+  const cfConnectingIp = request.headers.get("cf-connecting-ip"); // Cloudflare
+  const trueClientIp = request.headers.get("true-client-ip"); // Cloudflare Enterprise
+  const xClientIp = request.headers.get("x-client-ip");
+  
+  if (cfConnectingIp) return cfConnectingIp.trim();
+  if (trueClientIp) return trueClientIp.trim();
   if (forwardedFor) return forwardedFor.split(",")[0].trim();
   if (realIp) return realIp.trim();
+  if (xClientIp) return xClientIp.trim();
+  
   return "unknown";
 }
 
@@ -63,6 +78,11 @@ function getClientIdentifier(request: NextRequest): string {
  * Check rate limit for client
  */
 function checkRateLimit(clientId: string): { allowed: boolean; remaining?: number } {
+  // Cleanup old entries periodically (on-demand in serverless)
+  if (rateLimitStore.size > 1000) {
+    cleanupRateLimitStore();
+  }
+
   const now = Date.now();
   const userLimit = rateLimitStore.get(clientId);
 
@@ -80,6 +100,28 @@ function checkRateLimit(clientId: string): { allowed: boolean; remaining?: numbe
 
   userLimit.count += 1;
   return { allowed: true, remaining: RATE_LIMIT_REQUESTS - userLimit.count };
+}
+
+/**
+ * Get CORS headers based on request origin
+ */
+function getCorsHeaders(request: NextRequest): Record<string, string> {
+  const origin = request.headers.get("origin") || "";
+  const isAllowedOrigin = ALLOWED_ORIGINS.some(allowed => 
+    origin.startsWith(allowed.replace(/\/$/, ""))
+  );
+
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+
+  // Set origin header if it's in allowed list, otherwise allow all for same-origin
+  if (isAllowedOrigin || !origin) {
+    headers["Access-Control-Allow-Origin"] = origin || "*";
+  }
+
+  return headers;
 }
 
 /**
@@ -109,7 +151,18 @@ function validateMovieData(data: unknown): { valid: boolean; error?: string } {
  * POST /api/ai-facts - Generate AI-powered facts using Gemini API
  */
 export async function POST(request: NextRequest) {
+  const corsHeaders = getCorsHeaders(request);
+
   try {
+    // Check if Gemini API key is configured
+    if (!process.env.GEMINI_API_KEY) {
+      securityLogger.error("GEMINI_API_KEY not configured");
+      return NextResponse.json(
+        { error: "AI service not configured. Please contact administrator.", success: false },
+        { status: 503, headers: corsHeaders }
+      );
+    }
+
     // Rate limiting
     const clientId = getClientIdentifier(request);
     const rateLimitResult = checkRateLimit(clientId);
@@ -125,6 +178,7 @@ export async function POST(request: NextRequest) {
         {
           status: 429,
           headers: {
+            ...corsHeaders,
             "Retry-After": "3600",
             "X-RateLimit-Limit": RATE_LIMIT_REQUESTS.toString(),
             "X-RateLimit-Remaining": "0",
@@ -140,7 +194,7 @@ export async function POST(request: NextRequest) {
     if (!validation.valid) {
       return NextResponse.json(
         { error: validation.error, success: false },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -156,14 +210,22 @@ export async function POST(request: NextRequest) {
     const result = await geminiService.generateFacts(movieData);
 
     if (!result.success) {
+      securityLogger.error("Gemini API failed to generate facts", {
+        error: result.error,
+      });
+
       return NextResponse.json(
-        { error: "Failed to generate facts. Please try again later.", success: false },
-        { status: 500 }
+        { 
+          error: result.error || "Failed to generate facts. Please try again later.", 
+          success: false 
+        },
+        { status: 500, headers: corsHeaders }
       );
     }
 
     // Success response
     const responseHeaders: Record<string, string> = {
+      ...corsHeaders,
       "X-RateLimit-Limit": RATE_LIMIT_REQUESTS.toString(),
       "X-RateLimit-Remaining": (rateLimitResult.remaining || 0).toString(),
       "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
@@ -186,11 +248,12 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     securityLogger.error("AI facts generation failed", {
       error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     return NextResponse.json(
       { error: "Internal server error. Please try again later.", success: false },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -198,12 +261,14 @@ export async function POST(request: NextRequest) {
 /**
  * OPTIONS - CORS preflight
  */
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const corsHeaders = getCorsHeaders(request);
+  
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      ...corsHeaders,
+      "Access-Control-Max-Age": "86400", // Cache preflight for 24 hours
     },
   });
 }
